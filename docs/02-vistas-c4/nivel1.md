@@ -10,33 +10,30 @@ La vista representa a Nexora como un único sistema y muestra sus relaciones con
 
 ## Diagrama de contexto
 
-```mermaid
 flowchart TB
-    estudiante["Estudiante — S1"]
-    administrador["Administrador — S2"]
-    gestor["Gestor de información académica — S5"]
+    estudiante("ESTUDIANTE — Persona")
+    gestor("GESTOR ACADÉMICO — Persona")
+    administrador("ADMINISTRADOR — Persona")
 
-    nexora["Nexora — Sistema web de orientación vocacional"]
+    nexora("NEXORA — Sistema de software — Orientación vocacional, evaluaciones e informes")
 
-    correo["Servicio externo de correo — S4"]
-    portales["Portales oficiales de universidades — S6"]
+    correo("SERVICIO DE CORREO — Sistema externo")
+    universidades("PORTALES UNIVERSITARIOS — Sistema externo")
 
-    estudiante -->|"Responde el cuestionario y consulta resultados"| nexora
-    administrador -->|"Administra el sistema"| nexora
+    estudiante -->|"Inicia sesión, registra su evaluación y consulta el resultado"| nexora
     gestor -->|"Mantiene el catálogo académico"| nexora
+    administrador -->|"Gestiona cuentas y permisos"| nexora
 
     nexora -->|"Solicita el envío del informe PDF"| correo
-    nexora ~~~ portales
-    gestor -->|"Consulta la oferta oficial"| portales
+    nexora -->|"Ofrece enlaces a información oficial"| universidades
 
-    classDef persona fill:#E8F5E9,stroke:#267344,color:#153D25,stroke-width:2px
-    classDef sistema fill:#1E5B2E,stroke:#123D1E,color:#FFFFFF,stroke-width:2px
-    classDef externo fill:#F4F6F5,stroke:#718078,color:#26352C,stroke-width:2px
+    classDef persona fill:#EAF5EF,stroke:#307653,color:#173F2C,stroke-width:2px
+    classDef principal fill:#18583F,stroke:#0D3827,color:#FFFFFF,stroke-width:3px
+    classDef externo fill:#F0F4F7,stroke:#617D8B,color:#253F4C,stroke-width:2px
 
-    class estudiante,administrador,gestor persona
-    class nexora sistema
-    class correo,portales externo
-```
+    class estudiante,gestor,administrador persona
+    class nexora principal
+    class correo,universidades externo
 
 **Nota.** Elaboración propia para Nexora, el diagrama expresa el contexto del sistema, la consulta de los portales corresponde al gestor y no presupone una integración automática con las universidades.
 
