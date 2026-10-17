@@ -1,89 +1,76 @@
-# ADR-003: Selección del estilo arquitectónico de Nexora
+# ADR-003. Monolito modular con capas para Nexora
 
-| Campo | ADR-003 |
+## Estado
+
+Propuesta seleccionada en el dossier, pendiente de verificar en el código y validar mediante pruebas.
+
+## Contexto
+
+Nexora requiere autenticar al estudiante, registrar su evaluación, consultar el resultado y enviar un informe PDF por correo, el alcance académico comprende cuatro endpoints y conserva React, FastAPI y PostgreSQL como base tecnológica.
+
+La estructura debe proteger los recursos del estudiante, conservar la integridad de las evaluaciones, permitir cambios de reglas y limitar el efecto de los fallos del correo, la comparación utiliza seis criterios con pesos definidos en la matriz de decisión.
+
+## Decisión
+
+Seleccionar la alternativa A1, monolito modular con capas, mantener las capacidades de acceso, evaluaciones, resultados e informes dentro de una misma API FastAPI, con responsabilidades separadas para solicitudes, lógica de aplicación, reglas y acceso a datos e integraciones.
+
+La aplicación React consume la API, PostgreSQL conserva los datos y ReportLab genera el PDF dentro del backend, Gmail SMTP permanece como servicio externo.
+
+El diseño contempla tiempos de espera limitados y errores controlados para el correo, no incorpora una cola persistente, un broker ni un consumidor independiente.
+
+## Alternativas consideradas
+
+| Alternativa | Característica principal | Total ponderado |
+|---|---|---:|
+| A1. Monolito modular con capas | Una API con responsabilidades internas separadas y transacciones locales | 4,00 |
+| A2. Microservicios por capacidad | Servicios independientes con mayor coordinación operativa | 3,25 |
+| A3. Capas con eventos y outbox | Registro persistente de solicitudes de correo y procesamiento separado con reintentos | 3,95 |
+
+**Nota.** Las puntuaciones corresponden a una valoración de diseño sobre 5 y no representan resultados de pruebas.
+
+## Justificación
+
+A1 obtiene la mayor puntuación con los pesos del caso y permite conservar una transacción local para la evaluación, sus respuestas y su resultado, su menor cantidad de unidades de backend reduce la carga operativa frente a las alternativas evaluadas.
+
+La diferencia de 0,05 respecto a A3 es pequeña y no demuestra superioridad general, la elección depende del alcance actual y de la importancia asignada a la simplicidad de operación.
+
+El análisis de sensibilidad eleva el peso del correo del 20 % al 30 % y reduce el de operación del 10 % al 0 %, bajo ese supuesto A3 obtiene 4,15, A1 obtiene 3,80 y A2 obtiene 3,55, ese cambio identifica una condición para revisar la decisión y no sustituye los pesos originales.
+
+## Consecuencias
+
+| Beneficios | Costos y compromisos |
 |---|---|
-| **Título** | Monolito modular con capas para el backend de Nexora |
-| **Estado** | Propuesta como decisión final del dossier, pendiente de aceptación del equipo y verificación de los límites modulares en el código |
-| **Contexto** | Nexora utiliza React y TypeScript como interfaz, FastAPI como API y PostgreSQL como base de datos, genera informes PDF con ReportLab y solicita su envío directamente a Gmail SMTP, la interfaz ofrece enlaces hacia portales oficiales de universidades, el sistema requiere proteger recursos personales, conservar evaluaciones coherentes y permitir cambios controlados |
-| **Decisión** | Seleccionar un monolito modular con capas para el backend, conservar FastAPI como una unidad desplegable y organizar sus responsabilidades en acceso, catálogo académico, evaluación vocacional e informes, separar endpoints, lógica de aplicación y persistencia, conservar React y PostgreSQL como contenedores diferenciados |
-| **Alternativas** | (a) Monolito modular con capas: obtiene 4,10 sobre 5 en la matriz ponderada, (b) microservicios por capacidad: obtiene 3,35 sobre 5, permite despliegues y escalado independientes, pero exige gestionar contratos remotos, configuraciones y recuperación de fallos entre servicios |
-| **Consecuencias** | A favor: aprovechar la implementación existente, facilitar transacciones locales y reducir la complejidad operativa, en contra: desplegar el backend como una unidad, compartir recursos de ejecución y exigir disciplina para conservar los límites entre módulos |
-| **Trade-off** | Se priorizan la integridad de las evaluaciones y la simplicidad operativa, a cambio de limitar el despliegue y escalado independientes, la conexión directa con SMTP exige controlar esperas y errores para evitar que una falla del proveedor afecte las consultas |
-| **Vínculo** | Drivers D1 a D6, escenarios E1 a E6, restricciones R-01, R-04, R-08 y R-09, ADR-001, ADR-002, matriz de decisión y vistas C4 niveles 1 y 2 |
-| **Verificación prevista** | Revisar módulos y dependencias, ejecutar los procedimientos de E1 a E6 y contrastar las relaciones de los diagramas con el código, comprobar que los enlaces oficiales abren el destino previsto sin suponer sincronización de datos |
+| Conservar transacciones locales en PostgreSQL | Mantener límites claros entre las responsabilidades internas |
+| Compartir controles de acceso en la API | El backend comparte despliegue y recursos |
+| Localizar cambios en las reglas de evaluación | Evitar dependencias que extiendan cambios a otros módulos |
+| Reducir la carga operativa inicial | El correo carece de entrega recuperable automática en el diseño seleccionado |
 
-## 1. Organización del backend
+Los tiempos de espera y el tratamiento de errores no garantizan por sí solos el aislamiento del correo, el cumplimiento de E5 requiere pruebas sobre la API y su configuración de ejecución.
 
-| Módulo | Responsabilidad |
+## Validación
+
+| Escenario | Aspecto que verifica |
 |---|---|
-| Acceso | Autenticar usuarios, aplicar permisos y comprobar la propiedad de los recursos |
-| Catálogo académico | Consultar y mantener universidades, carreras, modalidades y enlaces oficiales |
-| Evaluación vocacional | Validar respuestas, aplicar reglas y conservar resultados e historial |
-| Informes | Generar el PDF y solicitar su envío a Gmail SMTP |
+| E1 | Rechazo de solicitudes de informes ajenos |
+| E2 | Reversión del registro ante fallos de persistencia |
+| E3 | Desempeño de la consulta de la última evaluación |
+| E4 | Cambio localizado de reglas y conservación del historial |
+| E5 | Continuidad de EP1–EP3 durante un fallo SMTP |
+| E6 | Rechazo de credenciales inválidas sin emitir tokens válidos |
 
-Los módulos representan una organización lógica dentro de FastAPI, su definición no implica procesos independientes ni microservicios.
+**Nota.** Las pruebas permanecen pendientes, los criterios completos se conservan en el contexto y drivers y en ADR-001 para E6.
 
-## 2. Separación por capas
+## Condiciones para revisar la decisión
 
-| Capa | Responsabilidad | Regla |
-|---|---|---|
-| Endpoints | Recibir solicitudes, validar su estructura y devolver respuestas | Delegar los casos de uso a la lógica de aplicación |
-| Aplicación y dominio | Aplicar reglas vocacionales, coordinar operaciones y verificar permisos | Evitar dependencias de la interfaz React y del protocolo SMTP |
-| Persistencia e integraciones | Acceder a PostgreSQL y adaptar la comunicación con Gmail SMTP | Evitar reglas vocacionales dentro de consultas y adaptadores externos |
+- Incumplimiento de E5 pese a los controles de espera y errores.
+- Necesidad de conservar solicitudes de correo y reintentar su entrega automáticamente.
+- Evidencia de que una capacidad requiere escalado o despliegue independiente.
+- Cambios en los pesos o restricciones que alteren la comparación de alternativas.
 
-La aplicación React presenta las funciones del sistema y consume la API, los enlaces oficiales forman parte de la navegación de la interfaz.
+## Documentación relacionada
 
-## 3. Correspondencia con las vistas C4
-
-| Elemento | Tipo | Relación con la decisión |
-|---|---|---|
-| Aplicación web | Contenedor: React 19 y TypeScript | Presentar catálogo, cuestionario, resultados y paneles, abrir enlaces oficiales |
-| API de Nexora | Contenedor: FastAPI y Python 3.11 | Ejecutar el backend modular, generar informes y solicitar correos |
-| Base de datos | Contenedor: PostgreSQL | Conservar cuentas, catálogo, respuestas y resultados |
-| Gmail SMTP | Sistema externo | Recibir las solicitudes de envío del informe PDF |
-| Portales oficiales de universidades | Sistemas externos | Proporcionar información institucional mediante navegación por enlaces |
-
-ReportLab funciona como biblioteca dentro del backend, el nivel 2 no incorpora un servicio independiente de notificaciones porque el flujo documentado conecta FastAPI directamente con Gmail SMTP.
-
-Los portales oficiales permanecen fuera del límite de Nexora, su relación representa apertura de enlaces y no una integración automática para actualizar el catálogo.
-
-## 4. Condiciones de la decisión
-
-- Aplicar la autorización en FastAPI y comprobar la propiedad de evaluaciones e informes
-- Registrar respuestas y resultados de una evaluación dentro de una transacción
-- Identificar la versión del cuestionario y de sus reglas de cálculo
-- Evitar dependencias circulares entre módulos
-- Concentrar la comunicación SMTP en un adaptador con límites de espera y errores controlados
-- Evitar que una falla del correo impida consultar resultados
-- Mantener las credenciales fuera del código y de la documentación pública
-- Revisar los enlaces oficiales como parte del mantenimiento del catálogo
-
-La conexión directa con SMTP no garantiza por sí sola el aislamiento de fallos, el cumplimiento de E5 requiere una prueba específica.
-
-## 5. Fundamento de la selección
-
-La matriz ponderada favorece la alternativa A con 4,10 sobre 5 frente a 3,35 de la alternativa B, la selección aprovecha la base tecnológica existente y facilita la integridad de las evaluaciones mediante transacciones locales.
-
-Los microservicios ofrecen independencia de despliegue y mayor aislamiento de procesos, esas ventajas requieren una infraestructura y una coordinación que deben justificarse con necesidades y evidencia del proyecto.
-
-## 6. Límites de la evidencia
-
-Las puntuaciones de la matriz corresponden a una valoración arquitectónica inicial, no representan resultados experimentales, la presencia de FastAPI y PostgreSQL tampoco demuestra por sí sola que el código respete límites modulares y capas.
-
-La revisión del repositorio debe identificar las responsabilidades, dependencias y transacciones existentes, cualquier diferencia debe registrarse como trabajo pendiente y reflejarse en el dossier.
-
-## 7. Criterios de revisión futura
-
-La decisión debe revisarse si las pruebas muestran límites persistentes de rendimiento pese a la optimización, si una capacidad requiere despliegues independientes o si el envío de informes afecta las consultas pese a las medidas de contención.
-
-La revisión debe comparar el costo y el beneficio de separar una capacidad en otro proceso o servicio, cualquier cambio requiere actualizar las vistas C4, la matriz y los ADR relacionados.
-
-## 8. Documentos relacionados
-
-- [Contexto y drivers](../01-contexto-y-drivers/contexto-y-drivers.md)
-- [Escenarios de calidad](../01-contexto-y-drivers/escenarios-de-calidad.md)
 - [Matriz de decisión](matriz-de-decision.md)
 - [ADR-001: control de acceso](ADR-001-control-de-acceso.md)
-- [ADR-002: integridad de evaluaciones](ADR-002.md)
-- [C4 nivel 1](../02-vistas-c4/nivel1.md)
-- [C4 nivel 2](../02-vistas-c4/nivel2.md)
+- [ADR-002: integridad e historial](ADR-002.md)
+- [Contexto, drivers y escenarios iniciales](../01-contexto-y-drivers/contexto-y-drivers.md)
+- [C4 nivel 2: contenedores](../02-vistas-c4/nivel2.md)
