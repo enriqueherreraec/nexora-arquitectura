@@ -1,34 +1,85 @@
-# C4 — Nivel 1: Contexto de Nexora
+# C4 nivel 1. Contexto del sistema Nexora
+
+## Propósito
+
+Nexora es un sistema web de orientación vocacional que permite al estudiante responder un cuestionario, consultar su evaluación y solicitar un informe PDF por correo, el sistema presenta información de carreras y universidades para apoyar la exploración académica, sus resultados son orientativos y no garantizan admisión ni afinidad profesional definitiva.
+
+## Alcance de la vista
+
+La vista representa a Nexora como un único sistema y muestra sus relaciones con las personas y los sistemas externos, el alcance académico de esta entrega comprende cuatro endpoints, la administración y el mantenimiento del catálogo se incluyen como contexto general.
+
+## Diagrama de contexto
 
 ```mermaid
-flowchart LR
-    E["Estudiante<br/>[Persona]"]
+flowchart TB
+    estudiante["Estudiante — S1"]
+    administrador["Administrador — S2"]
+    gestor["Gestor de información académica — S5"]
 
-    G["Gestor de información académica<br/>[Persona]"]
+    nexora["Nexora — Sistema web de orientación vocacional"]
 
-    A["Administrador<br/>[Persona]"]
+    correo["Servicio externo de correo — S4"]
+    portales["Portales oficiales de universidades — S6"]
 
-    N["Nexora<br/>[Sistema de software]<br/>Orientación vocacional y consulta<br/>de universidades y carreras del Ecuador"]
-
-    C["Servicio de correo electrónico<br/>[Sistema externo: Gmail SMTP]"]
-
-    P["Portales oficiales de universidades<br/>[Sistema externo]"]
-
-    E -->|"Consulta universidades y carreras,<br/>responde el cuestionario y solicita<br/>su informe PDF y envío por correo"| N
-
-    G -->|"Registra y actualiza la información<br/>de universidades, carreras,<br/>modalidades y enlaces oficiales"| N
-
-    A -->|"Gestiona cuentas, roles<br/>y permisos de acceso"| N
-
-    N -->|"Solicita el envío<br/>del informe vocacional"| C
-
-    N -->|"Dirige al estudiante mediante<br/>enlaces oficiales de consulta"| P
-
-    classDef persona fill:#DBEAFE,stroke:#1565C0,stroke-width:2px,color:#102A43;
-    classDef sistema fill:#EDE9FE,stroke:#7C3AED,stroke-width:3px,color:#3B0764;
-    classDef externo fill:#F1F5F9,stroke:#64748B,stroke-width:2px,color:#1E293B;
-
-    class E,G,A persona;
-    class N sistema;
-    class C,P externo;
+    estudiante -->|"Responde el cuestionario, consulta su resultado y solicita el informe"| nexora
+    administrador -->|"Administra el sistema según sus permisos"| nexora
+    gestor -->|"Mantiene el catálogo y sus fuentes"| nexora
+    gestor -->|"Consulta la oferta académica oficial"| portales
+    nexora -->|"Solicita el envío del informe PDF"| correo
+    correo -->|"Entrega el informe al correo del estudiante"| estudiante
 ```
+
+**Nota.** Elaboración propia para Nexora, el diagrama expresa el contexto del sistema, la consulta de los portales corresponde al gestor y no presupone una integración automática con las universidades.
+
+## Participantes y responsabilidades
+
+| ID | Participante | Responsabilidad o relación |
+|---|---|---|
+| S1 | Estudiante | Responder el cuestionario, consultar su última evaluación y solicitar el informe |
+| S2 | Administrador | Administrar el sistema conforme a los permisos establecidos |
+| S4 | Servicio externo de correo | Procesar la solicitud de envío y entregar el mensaje al destinatario |
+| S5 | Gestor de información académica | Mantener la vigencia y exactitud del catálogo de carreras y universidades |
+| S6 | Portales oficiales de universidades | Proporcionar fuentes para verificar la oferta académica |
+
+El equipo de desarrollo, identificado como S3 en el contexto y los drivers, participa en la construcción y el mantenimiento, su interés se documenta como stakeholder y no requiere una relación de uso en esta vista.
+
+## Operaciones incluidas en el análisis
+
+| ID | Método | Endpoint | Función |
+|---|---|---|---|
+| EP1 | POST | `/api/v1/auth/login` | Iniciar sesión |
+| EP2 | POST | `/api/v1/evaluaciones/` | Enviar las respuestas y registrar la evaluación |
+| EP3 | GET | `/api/v1/evaluaciones/ultima` | Consultar la última evaluación y su resultado |
+| EP4 | POST | `/api/v1/informes/{id}/enviar-correo` | Enviar el informe PDF al correo |
+
+**Nota.** La tabla delimita las cuatro operaciones del deber, los endpoints de administración y catálogo quedan fuera de este análisis.
+
+## Límites y condiciones
+
+- Nexora conserva la responsabilidad de autenticar al estudiante y verificar la propiedad de los recursos.
+- El proveedor de correo es externo al límite del sistema.
+- La solicitud de envío no equivale a una garantía de recepción en la bandeja del destinatario.
+- Los portales universitarios constituyen fuentes externas de información.
+- El mantenimiento del catálogo no supone acceso del gestor a resultados privados.
+- El registro de cuentas se considera una condición previa al flujo analizado.
+- La correspondencia exacta de las rutas con la API requiere verificación mediante OpenAPI.
+
+## Relación con los drivers
+
+| Driver | Relación con el contexto |
+|---|---|
+| D1. Seguridad | Proteger respuestas, resultados e informes del estudiante |
+| D2. Fiabilidad e integridad | Conservar la evaluación y su historial |
+| D3. Desempeño | Responder oportunamente a las operaciones del estudiante |
+| D4. Mantenibilidad | Permitir cambios localizados en reglas e integraciones |
+| D5. Continuidad ante fallos de correo | Mantener el flujo principal ante la indisponibilidad del proveedor |
+
+## Estado de la vista
+
+La vista documenta el contexto acordado para el dossier, las relaciones y los controles requieren contraste con el código y las pruebas antes de declarar su cumplimiento.
+
+## Documentación relacionada
+
+- [Contexto, drivers y escenarios de calidad](../01-contexto-y-drivers/contexto-y-drivers.md)
+- [C4 nivel 2: contenedores](nivel2.md)
+- [Decisiones arquitectónicas](../03-adr/)
