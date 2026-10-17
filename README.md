@@ -1,4 +1,4 @@
-# 🌿 Nexora
+# 🎓 Nexora
 ### Dossier de arquitectura · Sistema web de orientación vocacional
 
 **MAESTRÍA EN INGENIERÍA EN SOFTWARE**
