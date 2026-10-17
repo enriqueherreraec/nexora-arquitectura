@@ -1,106 +1,51 @@
 # Lecturas de apoyo
 
-## 1. Propósito
+## Propósito
 
-Estas lecturas apoyan la comparación de estilos arquitectónicos y la selección de herramientas para documentar Nexora, corresponden a las tareas de apoyo de la actividad y complementan la matriz de decisión y los ADR.
+Reunir fuentes de consulta para interpretar las vistas C4, documentar las decisiones arquitectónicas y orientar la evaluación de herramientas de apoyo utilizadas en Nexora.
 
-## 2. Estilos arquitectónicos
+## Fuentes y aplicación
 
-### 2.1 Síntesis de la lectura
-
-Un estilo arquitectónico establece criterios para organizar los elementos del sistema y sus relaciones, su selección requiere considerar los atributos de calidad y las restricciones del caso.
-
-La arquitectura por capas separa responsabilidades y limita dependencias, los microservicios distribuyen capacidades en servicios con despliegue independiente, esa distribución introduce necesidades de comunicación, coordinación y operación.
-
-Un monolito puede conservar módulos y capas internas, por tanto, una sola unidad de despliegue no implica ausencia de organización.
-
-**Fuentes:** Microsoft, Architecture styles y Common web application architectures.
-
-### 2.2 Aplicación al caso Nexora
-
-| Alternativa | Aplicación | Beneficio esperado | Compromiso |
-|---|---|---|---|
-| Monolito modular con capas | Organizar acceso, catálogo, evaluación e informes dentro de FastAPI | Aprovechar la implementación y facilitar transacciones locales | Compartir recursos y desplegar el backend como una unidad |
-| Microservicios | Separar capacidades en servicios independientes | Permitir escalado y despliegues por capacidad | Gestionar contratos remotos, fallos de red y varios despliegues |
-
-### 2.3 Criterio arquitectónico
-
-Para Nexora se propone un monolito modular con capas, esta alternativa se ajusta a la base existente y permite abordar la integridad de las evaluaciones sin introducir distribución adicional.
-
-La selección requiere límites modulares verificables, las pruebas de carga y disponibilidad pueden aportar evidencia para revisar la decisión en el futuro.
-
-## 3. Herramientas CASE
-
-### 3.1 Concepto
-
-CASE significa Computer-Aided Software Engineering, el término se refiere a herramientas que apoyan actividades de ingeniería de software, como análisis, modelado, documentación y mantenimiento.
-
-Una herramienta debe evaluarse por su ajuste a las tareas del equipo, la facilidad de uso y las posibilidades de integración, utilizar una herramienta no garantiza por sí solo la calidad del diseño.
-
-### 3.2 Distinción de herramientas en Nexora
-
-| Herramienta | Función |
-|---|---|
-| Mermaid | Representar diagramas mediante texto |
-| Git | Conservar versiones e historial de cambios |
-| GitHub | Alojar el repositorio y facilitar su revisión |
-| Antigravity | Editar archivos y apoyar el desarrollo |
-| ChatGPT | Proponer contenido que requiere revisión crítica |
-
-Estas herramientas apoyan actividades distintas, su inclusión en esta tabla no significa que todas constituyan una suite CASE ni que cumplan una certificación.
-
-## 4. Resumen introductorio de ISO/IEC 14102:2008
-
-### 4.1 Identificación
-
-**Título:** Information technology — Guideline for the evaluation and selection of CASE tools.
-
-La descripción pública de ISO/IEC 14102:2008 presenta procesos y un conjunto estructurado de características para evaluar técnicamente y seleccionar herramientas CASE.
-
-La selección debe considerar las necesidades de quienes utilizan las herramientas y su contexto de adopción, este resumen utiliza la ficha pública de ISO y no representa una revisión del contenido normativo completo.
-
-### 4.2 Aplicación propuesta a Nexora
-
-Para el dossier se propone definir necesidades, comparar alternativas y ejecutar una prueba con documentos reales del proyecto, los siguientes criterios son una adaptación del equipo y no una reproducción de requisitos de la norma.
-
-| Criterio propuesto | Pregunta de evaluación | Evidencia |
+| Fuente | Tema | Aplicación en Nexora |
 |---|---|---|
-| Adecuación | ¿Permite representar las vistas requeridas? | Diagramas C4 de niveles 1 y 2 |
-| Legibilidad | ¿Los actores y relaciones se comprenden? | Revisión cruzada |
-| Versionado | ¿Permite identificar los cambios? | Historial de Git |
-| Integración | ¿Los diagramas pueden revisarse desde el repositorio? | Renderizado en GitHub |
-| Portabilidad | ¿El código del diagrama puede conservarse y editarse? | Archivos Markdown |
-| Costo de adopción | ¿Qué esfuerzo requiere aprender y mantener la herramienta? | Prueba de uso del equipo |
+| Brown, modelo C4 | Contexto y contenedores | Diferenciar actores, sistemas externos, aplicación web, API y base de datos |
+| Nygard, registros ADR | Decisiones arquitectónicas | Documentar contexto, decisión, alternativas y consecuencias |
+| ISO/IEC 14102:2008 | Evaluación y selección de herramientas CASE | Identificar necesidades y criterios para comparar herramientas |
 
-### 4.3 Evaluación práctica propuesta
+## Aplicación de las lecturas
 
-| Paso | Aplicación |
-|---|---|
-| Definir la necesidad | Documentar las vistas C4 como código versionado |
-| Identificar alternativas | Comparar Mermaid y PlantUML |
-| Preparar una prueba | Representar el mismo fragmento de Nexora en ambas herramientas |
-| Revisar resultados | Comparar legibilidad, edición y publicación |
-| Registrar la selección | Justificar la herramienta elegida y sus límites |
+### Modelo C4
 
-Nexora utiliza Mermaid para las vistas del dossier, la comparación práctica con PlantUML permanece pendiente si no existe evidencia de su ejecución.
+El nivel 1 presenta Nexora como un sistema y muestra sus relaciones con estudiantes, administrador, gestor académico y sistemas externos, el nivel 2 identifica la aplicación React, la API FastAPI y PostgreSQL, los módulos internos de la API no se representan como microservicios independientes.
 
-## 5. Relación con el dossier
+### Registros de decisiones arquitectónicas
 
-La lectura de estilos aporta criterios para interpretar la matriz ponderada y ADR-003, la introducción a CASE aporta una guía para evaluar las herramientas de documentación.
+Los ADR conservan el problema, la decisión y sus consecuencias, Nexora utiliza ADR-001 para el control de acceso, ADR-002 para la integridad e historial de evaluaciones y ADR-003 para la elección del monolito modular con capas.
 
-Los diagramas y documentos requieren revisión aunque las herramientas permitan generarlos automáticamente, la consistencia se comprueba mediante trazabilidad, revisión cruzada y contraste con la implementación.
+### Evaluación de herramientas CASE
 
-## 6. Referencias
+La ficha pública de ISO/IEC 14102:2008 orienta el análisis de evaluación y selección de herramientas CASE, su aplicación al deber permite relacionar las necesidades de documentación con criterios como facilidad de uso, representación, exportación y mantenimiento.
 
-International Organization for Standardization. (2008). *ISO/IEC 14102:2008: Information technology — Guideline for the evaluation and selection of CASE tools*. https://www.iso.org/standard/43189.html
+Mermaid permite representar los diagramas mediante texto y GitHub conserva los archivos y su historial de cambios, esta relación describe su utilidad en el proyecto y no acredita cumplimiento de la norma.
 
-Microsoft. (s. f.). *Architecture styles*. Azure Architecture Center. https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/
+## Alcance de la consulta
 
-Microsoft. (s. f.). *Common web application architectures*. Microsoft Learn. https://learn.microsoft.com/en-us/dotnet/architecture/modern-web-apps-azure/common-web-application-architectures
+La referencia a ISO/IEC 14102 se limita a su información pública, no se declara acceso al texto completo ni una evaluación formal de conformidad, las fuentes respaldan el análisis y no sustituyen las pruebas de los escenarios de calidad.
 
-## 7. Documentos relacionados
+## Referencias
 
+Brown, S. (s. f.). *System context diagram*. C4 model. https://c4model.com/diagrams/system-context
+
+Brown, S. (s. f.). *Container diagram*. C4 model. https://c4model.com/diagrams/container
+
+International Organization for Standardization. (2008). *Information technology — Guideline for the evaluation and selection of CASE tools (ISO/IEC 14102:2008)*. https://www.iso.org/standard/43189.html
+
+Nygard, M. (2011, 15 de noviembre). *Documenting architecture decisions*. Cognitect. https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions
+
+## Documentación relacionada
+
+- [Contexto y drivers](01-contexto-y-drivers/contexto-y-drivers.md)
+- [C4 nivel 1](02-vistas-c4/nivel1.md)
+- [C4 nivel 2](02-vistas-c4/nivel2.md)
+- [Decisiones arquitectónicas](03-adr/)
 - [Matriz de decisión](03-adr/matriz-de-decision.md)
-- [ADR-003: estilo arquitectónico](03-adr/ADR-003-estilo-arquitectonico.md)
-- [Revisión cruzada](05-revision-cruzada.md)
-- [Registro de IA](04-registro-ia.md)
