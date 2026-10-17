@@ -21,12 +21,21 @@ flowchart TB
     correo["Servicio externo de correo — S4"]
     portales["Portales oficiales de universidades — S6"]
 
-    estudiante -->|"Responde el cuestionario, consulta su resultado y solicita el informe"| nexora
-    administrador -->|"Administra el sistema según sus permisos"| nexora
-    gestor -->|"Mantiene el catálogo y sus fuentes"| nexora
-    gestor -->|"Consulta la oferta académica oficial"| portales
+    estudiante -->|"Responde el cuestionario y consulta resultados"| nexora
+    administrador -->|"Administra el sistema"| nexora
+    gestor -->|"Mantiene el catálogo académico"| nexora
+
     nexora -->|"Solicita el envío del informe PDF"| correo
-    correo -->|"Entrega el informe al correo del estudiante"| estudiante
+    nexora ~~~ portales
+    gestor -->|"Consulta la oferta oficial"| portales
+
+    classDef persona fill:#E8F5E9,stroke:#267344,color:#153D25,stroke-width:2px
+    classDef sistema fill:#1E5B2E,stroke:#123D1E,color:#FFFFFF,stroke-width:2px
+    classDef externo fill:#F4F6F5,stroke:#718078,color:#26352C,stroke-width:2px
+
+    class estudiante,administrador,gestor persona
+    class nexora sistema
+    class correo,portales externo
 ```
 
 **Nota.** Elaboración propia para Nexora, el diagrama expresa el contexto del sistema, la consulta de los portales corresponde al gestor y no presupone una integración automática con las universidades.
