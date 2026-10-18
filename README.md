@@ -1,3 +1,4 @@
+![Banner de NEXORA](nexora.jpeg)
 # 🎓 Nexora
 ### Dossier de arquitectura · Sistema web de orientación vocacional
 
