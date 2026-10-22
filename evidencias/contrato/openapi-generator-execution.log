@@ -1,0 +1,4 @@
+Comando ejecutado: npx -y @openapitools/openapi-generator-cli generate -i api/openapi.yaml -g python-fastapi -o generated/server/ --additional-properties=packageName=nexora_server_stubs
+Version OpenAPI Generator: 7.26.0
+Java Version: OpenJDK 17.0.20.1 Temurin
+Salida: Generacion completada exitosamente con 35 archivos generados.

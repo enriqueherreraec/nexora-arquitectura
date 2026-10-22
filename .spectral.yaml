@@ -1,0 +1,11 @@
+extends: ["spectral:oas"]
+
+rules:
+  # Reglas estrictas para asegurar calidad formal del contrato OpenAPI 3.0
+  operation-description: warn
+  operation-operationId: error
+  operation-tags: error
+  info-contact: warn
+  info-description: error
+  no-$ref-siblings: error
+  oas3-api-servers: warn

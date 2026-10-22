@@ -1,0 +1,17 @@
+[flake8]
+max-line-length = 135
+exclude =
+    .git,
+    __pycache__,
+    venv,
+    node_modules,
+    generated,
+    .pytest_cache,
+    evidencias
+ignore =
+    E501,
+    W503,
+    E203
+per-file-ignores =
+    __init__.py: F401
+    tests/conftest.py: E402, F401

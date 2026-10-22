@@ -1,0 +1,134 @@
+{
+  "timestamp": "2026-10-22T09:56:34.4873945-05:00",
+  "prism_server": "http://127.0.0.1:4010",
+  "endpoints": [
+    {
+      "endpoint": "POST /api/v1/auth/login",
+      "status": 200,
+      "response": {
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.sintetico.ejemplo",
+        "token_type": "bearer",
+        "expires_in_seconds": 7200,
+        "usuario": {
+          "id": 101,
+          "email": "estudiante.demo@ejemplo.edu.ec",
+          "nombre_completo": "Juan Carlos Pérez",
+          "rol": "estudiante",
+          "activo": true,
+          "creado_en": "2026-10-22T08:00:00Z",
+          "perfil": {
+            "id": 1,
+            "usuario_id": 101,
+            "provincia": "Pichincha",
+            "ciudad": "Quito",
+            "modalidad_preferida": "Presencial",
+            "medio_transporte": "Transporte público"
+          }
+        }
+      }
+    },
+    {
+      "endpoint": "POST /api/v1/evaluaciones",
+      "status": 201,
+      "response": {
+        "id": 501,
+        "usuario_id": 101,
+        "creado_en": "2026-10-22T08:30:00Z",
+        "area_predominante": "Tecnología e Innovación",
+        "puntuaciones_areas": {
+          "Tecnología e Innovación": 8,
+          "Ciencias Exactas": 6,
+          "Ciencias de la Salud": 4,
+          "Arte y Creatividad": 2,
+          "Humanidades y Sociedad": 3,
+          "Administración y Negocios": 5,
+          "Ciencias Naturales y Agro": 1,
+          "Comunicación y Medios": 2,
+          "Educación y Pedagogía": 1,
+          "Seguridad y Defensa": 2
+        },
+        "es_empate": false,
+        "areas_empatadas": [],
+        "todas_cero": false,
+        "mensaje_resultado": "Evaluación vocacional completada con alta afinidad tecnológica.",
+        "version_cuestionario": "3.0-20preguntas",
+        "max_puntos_por_area": 8,
+        "provincia_origen": "Pichincha",
+        "ciudad_origen": "Quito",
+        "carreras_sugeridas": [
+          {
+            "nombre_carrera": "Ingeniería de Software",
+            "universidad": "Escuela Politécnica Nacional",
+            "provincia": "Pichincha",
+            "modalidad": "Presencial",
+            "puntaje_afinidad": 95
+          },
+          {
+            "nombre_carrera": "Computación",
+            "universidad": "Universidad Central del Ecuador",
+            "provincia": "Pichincha",
+            "modalidad": "Presencial",
+            "puntaje_afinidad": 90
+          }
+        ],
+        "recomendaciones": {
+          "enfoque_principal": "Fortalecer habilidades de lógica, algoritmia y desarrollo web.",
+          "sugerencia_exploratoria": "Revisar mallas curriculares de carreras de ingeniería en sistemas."
+        }
+      }
+    },
+    {
+      "endpoint": "GET /api/v1/evaluaciones/ultima",
+      "status": 200,
+      "response": {
+        "id": 501,
+        "usuario_id": 101,
+        "creado_en": "2026-10-22T08:30:00Z",
+        "area_predominante": "Tecnología e Innovación",
+        "puntuaciones_areas": {
+          "Tecnología e Innovación": 8,
+          "Ciencias Exactas": 6,
+          "Ciencias de la Salud": 4,
+          "Arte y Creatividad": 2,
+          "Humanidades y Sociedad": 3,
+          "Administración y Negocios": 5,
+          "Ciencias Naturales y Agro": 1,
+          "Comunicación y Medios": 2,
+          "Educación y Pedagogía": 1,
+          "Seguridad y Defensa": 2
+        },
+        "es_empate": false,
+        "areas_empatadas": [],
+        "todas_cero": false,
+        "version_cuestionario": "3.0-20preguntas",
+        "max_puntos_por_area": 8,
+        "provincia_origen": "Pichincha",
+        "ciudad_origen": "Quito",
+        "carreras_sugeridas": [
+          {
+            "nombre_carrera": "Ingeniería de Software",
+            "universidad": "Escuela Politécnica Nacional",
+            "provincia": "Pichincha",
+            "modalidad": "Presencial",
+            "puntaje_afinidad": 95
+          }
+        ],
+        "recomendaciones": {
+          "enfoque_principal": "Fortalecer habilidades de lógica, algoritmia y desarrollo web.",
+          "sugerencia_exploratoria": "Revisar mallas curriculares de carreras de ingeniería en sistemas."
+        }
+      }
+    },
+    {
+      "endpoint": "POST /api/v1/informes/501/enviar-correo",
+      "status": 200,
+      "response": {
+        "status": "success",
+        "mensaje": "Informe vocacional enviado exitosamente a estudiante.demo@ejemplo.edu.ec",
+        "destinatario": "estudiante.demo@ejemplo.edu.ec",
+        "evaluacion_id": 501,
+        "archivo_adjunto": "Informe_vocacional_Nexora.pdf"
+      }
+    }
+  ]
+}

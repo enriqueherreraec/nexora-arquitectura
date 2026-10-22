@@ -1,0 +1,3 @@
+python -m flake8 src tests
+Resultado: 0 violaciones detectadas (código de salida 0).
+Conformidad con PEP 8 y buenas prácticas de estilo verificadas en src/ y tests/.

@@ -1,0 +1,991 @@
+openapi: 3.0.3
+info:
+  contact:
+    email: contacto.nexora@ejemplo.edu.ec
+    name: Equipo de Arquitectura de Software Nexora
+    url: https://github.com/enriqueherreraec/nexora-arquitectura
+  description: "Contrato formal OpenAPI para el Sistema Web de Orientación Vocacional\
+    \ Nexora. Define las cuatro operaciones fundamentales del alcance arquitectónico\
+    \ acordado: autenticación de estudiantes, registro transaccional de evaluaciones\
+    \ Likert, consulta de resultados vigentes y despacho del informe PDF por correo\
+    \ electrónico."
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  title: Nexora API - Orientación Vocacional
+  version: 0.2.0
+servers:
+- description: Servidor de desarrollo local FastAPI
+  url: http://localhost:8002
+- description: Servidor de simulación Mock Prism
+  url: http://localhost:4010
+tags:
+- description: Gestión de sesiones e inicio de sesión de estudiantes y usuarios del
+    sistema.
+  name: Autenticación
+- description: Registro transaccional de respuestas Likert y consulta de afinidades
+    vocacionales.
+  name: Evaluaciones
+- description: Generación y despacho seguro de informes vocacionales oficiales en
+    PDF adjunto.
+  name: Informes
+paths:
+  /api/v1/auth/login:
+    post:
+      description: Valida las credenciales del estudiante contra el repositorio seguro
+        y retorna un token JWT de tipo Bearer junto con los datos del usuario autenticado.
+      operationId: iniciarSesion
+      requestBody:
+        content:
+          application/json:
+            example:
+              email: estudiante.demo@ejemplo.edu.ec
+              password: ClaveSegura2026.
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+        description: Credenciales de acceso del usuario registrado.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              example:
+                access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.sintetico.ejemplo
+                token_type: bearer
+                expires_in_seconds: 7200
+                usuario:
+                  id: 101
+                  email: estudiante.demo@ejemplo.edu.ec
+                  nombre_completo: Juan Carlos Pérez
+                  rol: estudiante
+                  activo: true
+                  creado_en: 2026-10-22T08:00:00Z
+                  perfil:
+                    id: 1
+                    usuario_id: 101
+                    provincia: Pichincha
+                    ciudad: Quito
+                    modalidad_preferida: Presencial
+                    medio_transporte: Transporte público
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+          description: Autenticación satisfactoria y emisión de token JWT.
+        "401":
+          content:
+            application/json:
+              example:
+                detail: Credenciales incorrectas. Verifique su correo y contraseña.
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Credenciales incorrectas o usuario no registrado.
+        "403":
+          content:
+            application/json:
+              example:
+                detail: Su cuenta se encuentra inactiva. Contacte al administrador
+                  del sistema.
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Cuenta desactivada por el administrador.
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+          description: Error de validación sintáctica en el cuerpo de la solicitud.
+      summary: Iniciar sesión con correo y contraseña
+      tags:
+      - Autenticación
+      x-python-fastapi-request-body-example:
+        email: estudiante.demo@ejemplo.edu.ec
+        password: ClaveSegura2026.
+  /api/v1/evaluaciones:
+    post:
+      description: "Procesa exactamente 20 respuestas en escala Likert (valores de\
+        \ 0 a 4), calcula las puntuaciones en 10 áreas vocacionales, determina las\
+        \ carreras sugeridas y persiste el intento en PostgreSQL de forma atómica."
+      operationId: crearEvaluacion
+      requestBody:
+        content:
+          application/json:
+            example:
+              respuestas:
+                "1": 4
+                "2": 3
+                "3": 4
+                "4": 2
+                "5": 1
+                "6": 0
+                "7": 4
+                "8": 3
+                "9": 2
+                "10": 1
+                "11": 4
+                "12": 3
+                "13": 2
+                "14": 4
+                "15": 1
+                "16": 0
+                "17": 3
+                "18": 4
+                "19": 2
+                "20": 4
+            schema:
+              $ref: "#/components/schemas/EnviarRespuestasRequest"
+        description: Diccionario con las 20 respuestas Likert indexadas por el número
+          de pregunta (1 a 20).
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              example:
+                id: 501
+                usuario_id: 101
+                creado_en: 2026-10-22T08:30:00Z
+                area_predominante: Tecnología e Innovación
+                puntuaciones_areas:
+                  Tecnología e Innovación: 8
+                  Ciencias Exactas: 6
+                  Ciencias de la Salud: 4
+                  Arte y Creatividad: 2
+                  Humanidades y Sociedad: 3
+                  Administración y Negocios: 5
+                  Ciencias Naturales y Agro: 1
+                  Comunicación y Medios: 2
+                  Educación y Pedagogía: 1
+                  Seguridad y Defensa: 2
+                es_empate: false
+                areas_empatadas: []
+                todas_cero: false
+                mensaje_resultado: Evaluación vocacional completada con alta afinidad
+                  tecnológica.
+                version_cuestionario: 3.0-20preguntas
+                max_puntos_por_area: 8
+                provincia_origen: Pichincha
+                ciudad_origen: Quito
+                carreras_sugeridas:
+                - nombre_carrera: Ingeniería de Software
+                  universidad: Escuela Politécnica Nacional
+                  provincia: Pichincha
+                  modalidad: Presencial
+                  puntaje_afinidad: 95
+                - nombre_carrera: Computación
+                  universidad: Universidad Central del Ecuador
+                  provincia: Pichincha
+                  modalidad: Presencial
+                  puntaje_afinidad: 90
+                recomendaciones:
+                  enfoque_principal: "Fortalecer habilidades de lógica, algoritmia\
+                    \ y desarrollo web."
+                  sugerencia_exploratoria: Revisar mallas curriculares de carreras
+                    de ingeniería en sistemas.
+              schema:
+                $ref: "#/components/schemas/EvaluacionResponse"
+          description: Evaluación registrada exitosamente con resultados calculados.
+        "400":
+          content:
+            application/json:
+              example:
+                detail: Cuestionario incompleto. Debe responder las 20 preguntas del
+                  test. Faltan 5 respuestas.
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Solicitud incompleta (respuestas insuficientes para las 20
+            preguntas).
+        "401":
+          content:
+            application/json:
+              example:
+                detail: No se pudo validar las credenciales de acceso.
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: "Token de autenticación ausente, vencido o no válido."
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+          description: Error de tipo o validación en las respuestas enviadas.
+      security:
+      - bearerAuth: []
+      summary: Enviar respuestas del cuestionario y generar evaluación vocacional
+      tags:
+      - Evaluaciones
+      x-python-fastapi-request-body-example:
+        respuestas:
+          "1": 4
+          "2": 3
+          "3": 4
+          "4": 2
+          "5": 1
+          "6": 0
+          "7": 4
+          "8": 3
+          "9": 2
+          "10": 1
+          "11": 4
+          "12": 3
+          "13": 2
+          "14": 4
+          "15": 1
+          "16": 0
+          "17": 3
+          "18": 4
+          "19": 2
+          "20": 4
+  /api/v1/evaluaciones/ultima:
+    get:
+      description: "Recupera la evaluación más reciente persistida para la cuenta\
+        \ en sesión, garantizando aislamiento de datos conforme al driver D1 y ADR-001.\
+        \ Retorna null si el estudiante aún no ha completado ninguna evaluación."
+      operationId: obtenerUltimaEvaluacion
+      responses:
+        "200":
+          content:
+            application/json:
+              example:
+                id: 501
+                usuario_id: 101
+                creado_en: 2026-10-22T08:30:00Z
+                area_predominante: Tecnología e Innovación
+                puntuaciones_areas:
+                  Tecnología e Innovación: 8
+                  Ciencias Exactas: 6
+                  Ciencias de la Salud: 4
+                  Arte y Creatividad: 2
+                  Humanidades y Sociedad: 3
+                  Administración y Negocios: 5
+                  Ciencias Naturales y Agro: 1
+                  Comunicación y Medios: 2
+                  Educación y Pedagogía: 1
+                  Seguridad y Defensa: 2
+                es_empate: false
+                areas_empatadas: []
+                todas_cero: false
+                version_cuestionario: 3.0-20preguntas
+                max_puntos_por_area: 8
+                provincia_origen: Pichincha
+                ciudad_origen: Quito
+                carreras_sugeridas:
+                - nombre_carrera: Ingeniería de Software
+                  universidad: Escuela Politécnica Nacional
+                  provincia: Pichincha
+                  modalidad: Presencial
+                  puntaje_afinidad: 95
+                recomendaciones:
+                  enfoque_principal: "Fortalecer habilidades de lógica, algoritmia\
+                    \ y desarrollo web."
+                  sugerencia_exploratoria: Revisar mallas curriculares de carreras
+                    de ingeniería en sistemas.
+              schema:
+                $ref: "#/components/schemas/UltimaEvaluacionResponse"
+          description: Última evaluación encontrada o resultado nulo si no tiene historial
+            previo.
+        "401":
+          content:
+            application/json:
+              example:
+                detail: No se pudo validar las credenciales de acceso.
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Token de autenticación ausente o inválido.
+      security:
+      - bearerAuth: []
+      summary: Consultar la última evaluación realizada por el estudiante autenticado
+      tags:
+      - Evaluaciones
+  /api/v1/informes/{id}/enviar-correo:
+    post:
+      description: "Verifica la propiedad estricta del recurso sobre el identificador\
+        \ de la evaluación, genera en memoria el informe oficial en formato PDF mediante\
+        \ ReportLab y despacha el documento adjunto hacia la dirección de correo registrada\
+        \ mediante SMTP."
+      operationId: enviarInformeCorreo
+      parameters:
+      - description: Identificador numérico único de la evaluación a despachar.
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          example: 501
+          minimum: 1
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              example:
+                status: success
+                mensaje: Informe vocacional enviado exitosamente a estudiante.demo@ejemplo.edu.ec
+                destinatario: estudiante.demo@ejemplo.edu.ec
+                evaluacion_id: 501
+                archivo_adjunto: Informe_vocacional_Nexora.pdf
+              schema:
+                $ref: "#/components/schemas/InformeEnvioResponse"
+          description: Informe PDF generado y enviado satisfactoriamente al buzón
+            del estudiante.
+        "401":
+          content:
+            application/json:
+              example:
+                detail: No se pudo validar las credenciales de acceso.
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Solicitante no autenticado.
+        "404":
+          content:
+            application/json:
+              example:
+                detail: Evaluación no encontrada o no autorizada para su cuenta.
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Evaluación no encontrada o no autorizada para la cuenta en
+            sesión (aislamiento ADR-001).
+        "503":
+          content:
+            application/json:
+              example:
+                detail: El servicio de envío de correos no se encuentra disponible
+                  temporalmente. Intente más tarde.
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Fallo controlado del proveedor de correo SMTP (continuidad
+            del servicio según E5).
+      security:
+      - bearerAuth: []
+      summary: Despachar informe vocacional en PDF al correo de la cuenta
+      tags:
+      - Informes
+components:
+  schemas:
+    LoginRequest:
+      example:
+        email: estudiante.demo@ejemplo.edu.ec
+        password: ClaveSegura2026.
+      properties:
+        email:
+          description: Correo electrónico institucional o personal registrado.
+          example: estudiante.demo@ejemplo.edu.ec
+          format: email
+          maxLength: 120
+          title: email
+          type: string
+        password:
+          description: Contraseña de la cuenta del estudiante.
+          example: ClaveSegura2026.
+          maxLength: 100
+          minLength: 8
+          title: password
+          type: string
+      required:
+      - email
+      - password
+      title: LoginRequest
+      type: object
+    UsuarioResponse:
+      example:
+        id: 101
+        email: estudiante.demo@ejemplo.edu.ec
+        nombre_completo: Juan Carlos Pérez
+        rol: estudiante
+        activo: true
+        creado_en: 2026-10-22T08:00:00Z
+        perfil:
+          id: 1
+          usuario_id: 101
+          provincia: Pichincha
+          ciudad: Quito
+          modalidad_preferida: Presencial
+          medio_transporte: Transporte público
+      properties:
+        id:
+          description: Identificador único del usuario.
+          example: 101
+          title: id
+          type: integer
+        email:
+          description: Correo electrónico del usuario.
+          example: estudiante.demo@ejemplo.edu.ec
+          format: email
+          title: email
+          type: string
+        nombre_completo:
+          description: Nombres y apellidos completos.
+          example: Juan Carlos Pérez
+          title: nombre_completo
+          type: string
+        rol:
+          description: Rol asignado al usuario.
+          enum:
+          - estudiante
+          - gestor
+          - admin
+          example: estudiante
+          title: rol
+          type: string
+        activo:
+          description: Indicador de cuenta activa.
+          example: true
+          title: activo
+          type: boolean
+        creado_en:
+          description: Fecha y hora de creación de la cuenta.
+          example: 2026-10-22T08:00:00Z
+          format: date-time
+          title: creado_en
+          type: string
+        perfil:
+          $ref: "#/components/schemas/PerfilResponse"
+      required:
+      - activo
+      - creado_en
+      - email
+      - id
+      - nombre_completo
+      - rol
+      title: UsuarioResponse
+      type: object
+    PerfilResponse:
+      example:
+        id: 1
+        usuario_id: 101
+        provincia: Pichincha
+        ciudad: Quito
+        modalidad_preferida: Presencial
+        medio_transporte: Transporte público
+      properties:
+        id:
+          description: Identificador del perfil geográfico y preferencias.
+          example: 1
+          title: id
+          type: integer
+        usuario_id:
+          description: Identificador de la cuenta de usuario asociada.
+          example: 101
+          title: usuario_id
+          type: integer
+        provincia:
+          description: Provincia de residencia del estudiante.
+          example: Pichincha
+          title: provincia
+          type: string
+        ciudad:
+          description: Ciudad o cantón de residencia.
+          example: Quito
+          title: ciudad
+          type: string
+        modalidad_preferida:
+          description: Modalidad de estudio preferida.
+          enum:
+          - Presencial
+          - Semipresencial
+          - En línea
+          - Híbrida
+          example: Presencial
+          title: modalidad_preferida
+          type: string
+        medio_transporte:
+          description: Medio de transporte habitual para desplazamientos.
+          example: Transporte público
+          title: medio_transporte
+          type: string
+      required:
+      - ciudad
+      - id
+      - medio_transporte
+      - modalidad_preferida
+      - provincia
+      - usuario_id
+      title: PerfilResponse
+      type: object
+    TokenResponse:
+      example:
+        access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        token_type: bearer
+        expires_in_seconds: 7200
+        usuario:
+          id: 101
+          email: estudiante.demo@ejemplo.edu.ec
+          nombre_completo: Juan Carlos Pérez
+          rol: estudiante
+          activo: true
+          creado_en: 2026-10-22T08:00:00Z
+          perfil:
+            id: 1
+            usuario_id: 101
+            provincia: Pichincha
+            ciudad: Quito
+            modalidad_preferida: Presencial
+            medio_transporte: Transporte público
+      properties:
+        access_token:
+          description: Token de autenticación JWT.
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+          title: access_token
+          type: string
+        token_type:
+          default: bearer
+          description: Tipo de esquema de autorización.
+          example: bearer
+          title: token_type
+          type: string
+        expires_in_seconds:
+          description: Tiempo de vigencia del token en segundos.
+          example: 7200
+          title: expires_in_seconds
+          type: integer
+        usuario:
+          $ref: "#/components/schemas/UsuarioResponse"
+      required:
+      - access_token
+      - expires_in_seconds
+      - token_type
+      - usuario
+      title: TokenResponse
+      type: object
+    EnviarRespuestasRequest:
+      example:
+        respuestas:
+          "1": 4
+          "2": 3
+          "3": 2
+          "4": 1
+          "5": 0
+          "6": 4
+          "7": 3
+          "8": 2
+          "9": 1
+          "10": 0
+          "11": 4
+          "12": 3
+          "13": 2
+          "14": 1
+          "15": 0
+          "16": 4
+          "17": 3
+          "18": 2
+          "19": 1
+          "20": 0
+      properties:
+        respuestas:
+          additionalProperties:
+            maximum: 4
+            minimum: 0
+            type: integer
+          description: "Mapa de respuestas con exactamente 20 elementos, donde las\
+            \ claves son cadenas del \"1\" al \"20\" y los valores enteros Likert\
+            \ de 0 a 4."
+          example:
+            "1": 4
+            "2": 3
+            "3": 2
+            "4": 1
+            "5": 0
+            "6": 4
+            "7": 3
+            "8": 2
+            "9": 1
+            "10": 0
+            "11": 4
+            "12": 3
+            "13": 2
+            "14": 1
+            "15": 0
+            "16": 4
+            "17": 3
+            "18": 2
+            "19": 1
+            "20": 0
+          title: respuestas
+          type: object
+      required:
+      - respuestas
+      title: EnviarRespuestasRequest
+      type: object
+    CarreraSugerida:
+      example:
+        nombre_carrera: Ingeniería de Software
+        universidad: Escuela Politécnica Nacional
+        provincia: Pichincha
+        modalidad: Presencial
+        puntaje_afinidad: 95
+      properties:
+        nombre_carrera:
+          description: Denominación oficial de la carrera universitaria.
+          example: Ingeniería de Software
+          title: nombre_carrera
+          type: string
+        universidad:
+          description: Nombre de la institución de educación superior pública.
+          example: Escuela Politécnica Nacional
+          title: universidad
+          type: string
+        provincia:
+          description: Provincia donde se oferta la carrera.
+          example: Pichincha
+          title: provincia
+          type: string
+        modalidad:
+          description: Modalidad de impartición de la carrera.
+          example: Presencial
+          title: modalidad
+          type: string
+        puntaje_afinidad:
+          description: Índice porcentual de compatibilidad vocacional.
+          example: 95
+          maximum: 100
+          minimum: 0
+          title: puntaje_afinidad
+          type: integer
+      required:
+      - modalidad
+      - nombre_carrera
+      - provincia
+      - puntaje_afinidad
+      - universidad
+      title: CarreraSugerida
+      type: object
+    RecomendacionesPedagogicas:
+      example:
+        enfoque_principal: "Fortalecer habilidades de lógica, algoritmia y desarrollo\
+          \ web."
+        sugerencia_exploratoria: Revisar mallas curriculares de carreras de ingeniería
+          en sistemas.
+      properties:
+        enfoque_principal:
+          description: Diagnóstico vocacional orientativo sobre el área predominante.
+          example: "Fortalecer habilidades de lógica, algoritmia y desarrollo web."
+          title: enfoque_principal
+          type: string
+        sugerencia_exploratoria:
+          description: Recomendación práctica para explorar mallas y campos profesionales.
+          example: Revisar mallas curriculares de carreras de ingeniería en sistemas.
+          title: sugerencia_exploratoria
+          type: string
+      required:
+      - enfoque_principal
+      - sugerencia_exploratoria
+      title: RecomendacionesPedagogicas
+      type: object
+    EvaluacionResponse:
+      example:
+        id: 501
+        usuario_id: 101
+        creado_en: 2026-10-22T08:30:00Z
+        area_predominante: Tecnología e Innovación
+        puntuaciones_areas:
+          Tecnología e Innovación: 8
+          Ciencias Exactas: 6
+          Ciencias de la Salud: 4
+          Arte y Creatividad: 2
+          Humanidades y Sociedad: 3
+          Administración y Negocios: 5
+          Ciencias Naturales y Agro: 1
+          Comunicación y Medios: 2
+          Educación y Pedagogía: 1
+          Seguridad y Defensa: 2
+        es_empate: false
+        areas_empatadas: []
+        todas_cero: false
+        mensaje_resultado: Evaluación vocacional completada con alta afinidad tecnológica.
+        version_cuestionario: 3.0-20preguntas
+        max_puntos_por_area: 8
+        provincia_origen: Pichincha
+        ciudad_origen: Quito
+        carreras_sugeridas:
+        - nombre_carrera: Ingeniería de Software
+          universidad: Escuela Politécnica Nacional
+          provincia: Pichincha
+          modalidad: Presencial
+          puntaje_afinidad: 95
+        - nombre_carrera: Ingeniería de Software
+          universidad: Escuela Politécnica Nacional
+          provincia: Pichincha
+          modalidad: Presencial
+          puntaje_afinidad: 95
+        recomendaciones:
+          enfoque_principal: "Fortalecer habilidades de lógica, algoritmia y desarrollo\
+            \ web."
+          sugerencia_exploratoria: Revisar mallas curriculares de carreras de ingeniería
+            en sistemas.
+      properties:
+        id:
+          description: Identificador numérico único de la evaluación en la base de
+            datos.
+          example: 501
+          title: id
+          type: integer
+        usuario_id:
+          description: Identificador del estudiante que completó el cuestionario.
+          example: 101
+          title: usuario_id
+          type: integer
+        creado_en:
+          description: Marca temporal ISO de registro de la evaluación.
+          example: 2026-10-22T08:30:00Z
+          format: date-time
+          title: creado_en
+          type: string
+        area_predominante:
+          description: Nombre del área vocacional con mayor puntuación acumulada.
+          example: Tecnología e Innovación
+          title: area_predominante
+          type: string
+        puntuaciones_areas:
+          additionalProperties:
+            type: integer
+          description: Puntuaciones obtenidas en las 10 áreas vocacionales evaluadas.
+          example:
+            Tecnología e Innovación: 8
+            Ciencias Exactas: 6
+            Ciencias de la Salud: 4
+            Arte y Creatividad: 2
+            Humanidades y Sociedad: 3
+            Administración y Negocios: 5
+            Ciencias Naturales y Agro: 1
+            Comunicación y Medios: 2
+            Educación y Pedagogía: 1
+            Seguridad y Defensa: 2
+          title: puntuaciones_areas
+          type: object
+        es_empate:
+          description: Indica si existió empate en el puntaje más alto entre dos o
+            más áreas.
+          example: false
+          title: es_empate
+          type: boolean
+        areas_empatadas:
+          description: Lista de áreas que empataron en el primer lugar (vacío si no
+            hay empate).
+          example: []
+          items:
+            type: string
+          title: areas_empatadas
+          type: array
+        todas_cero:
+          description: Indicador de si todas las respuestas fueron 0 (desinterés generalizado).
+          example: false
+          title: todas_cero
+          type: boolean
+        mensaje_resultado:
+          description: Mensaje descriptivo para la interfaz del usuario.
+          example: Evaluación vocacional completada con alta afinidad tecnológica.
+          title: mensaje_resultado
+          type: string
+        version_cuestionario:
+          description: Versión del cuestionario aplicada para garantizar inmutabilidad
+            histórica (ADR-002).
+          example: 3.0-20preguntas
+          title: version_cuestionario
+          type: string
+        max_puntos_por_area:
+          description: Puntuación máxima posible por área vocacional.
+          example: 8
+          title: max_puntos_por_area
+          type: integer
+        provincia_origen:
+          description: Provincia del perfil al momento de la evaluación.
+          example: Pichincha
+          title: provincia_origen
+          type: string
+        ciudad_origen:
+          description: Ciudad del perfil al momento de la evaluación.
+          example: Quito
+          title: ciudad_origen
+          type: string
+        carreras_sugeridas:
+          description: Listado ordenado de carreras universitarias sugeridas según
+            afinidad y cercanía.
+          items:
+            $ref: "#/components/schemas/CarreraSugerida"
+          title: carreras_sugeridas
+          type: array
+        recomendaciones:
+          $ref: "#/components/schemas/RecomendacionesPedagogicas"
+      required:
+      - area_predominante
+      - areas_empatadas
+      - carreras_sugeridas
+      - ciudad_origen
+      - creado_en
+      - es_empate
+      - id
+      - max_puntos_por_area
+      - provincia_origen
+      - puntuaciones_areas
+      - recomendaciones
+      - todas_cero
+      - usuario_id
+      - version_cuestionario
+      title: EvaluacionResponse
+      type: object
+    UltimaEvaluacionResponse:
+      allOf:
+      - $ref: "#/components/schemas/EvaluacionResponse"
+      description: Puede ser el objeto EvaluacionResponse o null si no hay registros.
+      example:
+        id: 501
+        usuario_id: 101
+        creado_en: 2026-10-22T08:30:00Z
+        area_predominante: Tecnología e Innovación
+        puntuaciones_areas:
+          Tecnología e Innovación: 8
+          Ciencias Exactas: 6
+          Ciencias de la Salud: 4
+          Arte y Creatividad: 2
+          Humanidades y Sociedad: 3
+          Administración y Negocios: 5
+          Ciencias Naturales y Agro: 1
+          Comunicación y Medios: 2
+          Educación y Pedagogía: 1
+          Seguridad y Defensa: 2
+        es_empate: false
+        areas_empatadas: []
+        todas_cero: false
+        mensaje_resultado: Evaluación vocacional completada con alta afinidad tecnológica.
+        version_cuestionario: 3.0-20preguntas
+        max_puntos_por_area: 8
+        provincia_origen: Pichincha
+        ciudad_origen: Quito
+        carreras_sugeridas:
+        - nombre_carrera: Ingeniería de Software
+          universidad: Escuela Politécnica Nacional
+          provincia: Pichincha
+          modalidad: Presencial
+          puntaje_afinidad: 95
+        - nombre_carrera: Ingeniería de Software
+          universidad: Escuela Politécnica Nacional
+          provincia: Pichincha
+          modalidad: Presencial
+          puntaje_afinidad: 95
+        recomendaciones:
+          enfoque_principal: "Fortalecer habilidades de lógica, algoritmia y desarrollo\
+            \ web."
+          sugerencia_exploratoria: Revisar mallas curriculares de carreras de ingeniería
+            en sistemas.
+      nullable: true
+      title: UltimaEvaluacionResponse
+      type: object
+    InformeEnvioResponse:
+      example:
+        status: success
+        mensaje: Informe vocacional enviado exitosamente a estudiante.demo@ejemplo.edu.ec
+        destinatario: estudiante.demo@ejemplo.edu.ec
+        evaluacion_id: 501
+        archivo_adjunto: Informe_vocacional_Nexora.pdf
+      properties:
+        status:
+          description: Estado del proceso de despacho del informe.
+          enum:
+          - success
+          - error
+          example: success
+          title: status
+          type: string
+        mensaje:
+          description: Mensaje de confirmación del despacho.
+          example: Informe vocacional enviado exitosamente a estudiante.demo@ejemplo.edu.ec
+          title: mensaje
+          type: string
+        destinatario:
+          description: Dirección de correo electrónico receptora del mensaje.
+          example: estudiante.demo@ejemplo.edu.ec
+          format: email
+          title: destinatario
+          type: string
+        evaluacion_id:
+          description: Identificador de la evaluación despachada.
+          example: 501
+          title: evaluacion_id
+          type: integer
+        archivo_adjunto:
+          description: Nombre del archivo PDF adjunto en el correo.
+          example: Informe_vocacional_Nexora.pdf
+          title: archivo_adjunto
+          type: string
+      required:
+      - archivo_adjunto
+      - destinatario
+      - evaluacion_id
+      - mensaje
+      - status
+      title: InformeEnvioResponse
+      type: object
+    ErrorResponse:
+      example:
+        detail: Credenciales incorrectas. Verifique su correo y contraseña.
+      properties:
+        detail:
+          description: Mensaje explicativo del error ocurrido.
+          example: Credenciales incorrectas. Verifique su correo y contraseña.
+          title: detail
+          type: string
+      required:
+      - detail
+      title: ErrorResponse
+      type: object
+    ValidationErrorItem:
+      example:
+        loc:
+        - body
+        - email
+        msg: value is not a valid email address
+        type: value_error.email
+      properties:
+        loc:
+          description: Ubicación del campo inválido en la solicitud.
+          example:
+          - body
+          - email
+          items:
+            type: string
+          title: loc
+          type: array
+        msg:
+          description: Descripción del error de validación.
+          example: value is not a valid email address
+          title: msg
+          type: string
+        type:
+          description: Tipo de regla de validación infringida.
+          example: value_error.email
+          title: type
+          type: string
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationErrorItem
+      type: object
+    ValidationErrorResponse:
+      example:
+        detail:
+        - loc:
+          - body
+          - email
+          msg: value is not a valid email address
+          type: value_error.email
+        - loc:
+          - body
+          - email
+          msg: value is not a valid email address
+          type: value_error.email
+      properties:
+        detail:
+          items:
+            $ref: "#/components/schemas/ValidationErrorItem"
+          title: detail
+          type: array
+      required:
+      - detail
+      title: ValidationErrorResponse
+      type: object
+  securitySchemes:
+    bearerAuth:
+      bearerFormat: JWT
+      description: Token JWT emitido por la operación de inicio de sesión (/api/v1/auth/login).
+      scheme: bearer
+      type: http

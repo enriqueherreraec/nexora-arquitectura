@@ -1,0 +1,22 @@
+[9:56:18 a.m.] » [CLI] ...  awaiting  Starting Prism…
+[9:56:18 a.m.] » [CLI] i  info      POST       http://127.0.0.1:4010/api/v1/auth/login
+[9:56:18 a.m.] » [CLI] i  info      POST       http://127.0.0.1:4010/api/v1/evaluaciones
+[9:56:18 a.m.] » [CLI] i  info      GET        http://127.0.0.1:4010/api/v1/evaluaciones/ultima
+[9:56:18 a.m.] » [CLI] i  info      POST       http://127.0.0.1:4010/api/v1/informes/144/enviar-correo
+[9:56:18 a.m.] » [CLI] ►  start     Prism is listening on http://127.0.0.1:4010
+[9:56:34 a.m.] » [HTTP SERVER] post /api/v1/auth/login i  info      Request received
+[9:56:34 a.m.] »     [VALIDATOR] √  success   The request passed the validation rules. Looking for the best response
+[9:56:34 a.m.] »     [NEGOTIATOR] √  success   Responding with the requested status code 200
+[9:56:34 a.m.] »     [NEGOTIATOR] i  info      > Responding with "200"
+[9:56:34 a.m.] » [HTTP SERVER] post /api/v1/evaluaciones i  info      Request received
+[9:56:34 a.m.] »     [VALIDATOR] √  success   The request passed the validation rules. Looking for the best response
+[9:56:34 a.m.] »     [NEGOTIATOR] √  success   Responding with the requested status code 201
+[9:56:34 a.m.] »     [NEGOTIATOR] i  info      > Responding with "201"
+[9:56:34 a.m.] » [HTTP SERVER] get /api/v1/evaluaciones/ultima i  info      Request received
+[9:56:34 a.m.] »     [VALIDATOR] √  success   The request passed the validation rules. Looking for the best response
+[9:56:34 a.m.] »     [NEGOTIATOR] √  success   Responding with the requested status code 200
+[9:56:34 a.m.] »     [NEGOTIATOR] i  info      > Responding with "200"
+[9:56:34 a.m.] » [HTTP SERVER] post /api/v1/informes/501/enviar-correo i  info      Request received
+[9:56:34 a.m.] »     [VALIDATOR] √  success   The request passed the validation rules. Looking for the best response
+[9:56:34 a.m.] »     [NEGOTIATOR] √  success   Responding with the requested status code 200
+[9:56:34 a.m.] »     [NEGOTIATOR] i  info      > Responding with "200"

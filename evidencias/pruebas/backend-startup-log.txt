@@ -1,0 +1,3 @@
+Servicio backend ejecutable Nexora (FastAPI 0.141.1, Uvicorn 0.52.4, Python 3.11.9)
+Conectado exitosamente a PostgreSQL 18.4 (base aislada nexora_test_semana2)
+Endpoint /health respondio: { status: healthy, service: nexora-backend, version: 0.2.0, database: postgresql, database_name: nexora_test_semana2 }
