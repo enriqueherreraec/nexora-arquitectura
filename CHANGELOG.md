@@ -11,9 +11,14 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/
 - **Registro de Decisión Arquitectónica ADR-004 (`docs/03-adr/ADR-004-control-de-versiones.md`):** Formalización de la selección de Git, GitHub y GitHub Flow, delimitación de responsabilidades y análisis de caso de uso para SVN (PR #6, Issue #5).
 - **Informe de Resolución de Conflicto de Integración (`docs/10-conflicto-integracion.md`):** Documentación técnica del ejercicio controlado de colisión entre PR #8 y PR #10, marcadores tripartitos, trazabilidad de hashes y resolución unificada (Issue #9).
 - **Evidencia Histórica de Conflicto (`evidencias/semana3/conflicto/README-con-conflicto.md`):** Respaldo auditable del archivo con marcadores de conflicto antes de la resolución.
+- **Informe de Cierre de Semana 3 (`docs/11-cierre-semana3.md`):** Matriz de cumplimiento frente a la rúbrica UPEC, registro de revisiones cruzadas, auditorías y trazabilidad de pull requests (PR de cierre pendiente de creación, Issue #11).
+- **Auditoría de Seguridad y Dependencias (`evidencias/semana3/seguridad/`):** Informes de escaneo de secretos (`auditoria-secretos.txt`), compatibilidad de dependencias con `pip check` (`auditoria-dependencias.txt`) y análisis de vulnerabilidades con `pip-audit` (`auditoria-pip-audit.txt`).
+- **Evidencias de Reglas de Gobernanza (`evidencias/semana3/gobernanza/`):** Cuatro capturas reales de la configuración de ruleset en GitHub (Settings → Rules → Rulesets) que acreditan la protección de main, revisión obligatoria (1 aprobación), descarte de revisiones obsoletas, resolución de conversaciones y bloqueo de push forzado.
 
 ### Modificado
-- **README Principal (`README.md`):** Metadatos académicos de Semana 3, enlaces a artefactos de gobernanza, sección formal de flujo de colaboración de 6 pasos y unificación de la fila de control de versiones con criterios de GitHub Flow y protección de rama.
+- **README Principal (`README.md`):** Metadatos académicos de Semana 3, enlaces a artefactos de gobernanza, sección formal de flujo de colaboración de 6 pasos, unificación de la fila de control de versiones y enlaces a los informes 10 y 11.
+- **Registro de Decisión ADR-004 (`docs/03-adr/ADR-004-control-de-versiones.md`):** Estado actualizado a Aceptado tras la integración del PR #6 en la rama principal.
+- **Registro de Inteligencia Artificial (`docs/04-registro-ia.md`):** Incorporación de las intervenciones de asistencia técnica de Semana 3 en gobernanza, matriz comparativa, ADR-004, resolución local de conflictos y auditoría.
 
 ---
 

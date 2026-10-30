@@ -2,7 +2,7 @@
 
 ## Estado
 
-Propuesto (30 de octubre de 2026), pendiente de revisión y aprobación del pull request correspondiente.
+Aceptado (30 de octubre de 2026), aprobado e integrado en `main` mediante el Pull Request #6.
 
 ## Contexto
 

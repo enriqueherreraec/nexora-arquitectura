@@ -1,0 +1,29 @@
+================================================================================
+AUDITORIA DE VULNERABILIDADES CON PIP-AUDIT - NEXORA (SEMANA 3)
+Fecha: 2026-10-30
+Herramienta: pip-audit v2.10.1 (ejecutado en entorno temporal aislado en scratch/venv_audit)
+Archivo analizado: requirements.txt
+Base de datos de vulnerabilidades: PyPA Advisory Database / OSV
+================================================================================
+
+[1] COMANDO REAL EJECUTADO:
+& "C:\Users\HP VICTUS\.gemini\antigravity-ide\brain\40d8aae5-247e-44c1-9cf8-2a46c76263ac\scratch\venv_audit\Scripts\pip-audit.exe" -r requirements.txt
+
+[2] CODIGO DE SALIDA (EXIT CODE):
+0
+
+[3] SALIDA REAL (STDOUT / STDERR):
+WARNING:venv:Actual environment location may have moved due to redirects, links or junctions.
+  Requested location: "C:\Users\HPVICT~1\AppData\Local\Temp\tmpw1syzkej\Scripts\python.exe"
+  Actual location:    "C:\Users\HP VICTUS\AppData\Local\Temp\tmpw1syzkej\Scripts\python.exe"
+No known vulnerabilities found
+
+================================================================================
+INTERPRETACION Y ALCANCE DE LOS RESULTADOS:
+- pip-audit resolvio las dependencias declaradas en requirements.txt y consulto la base de datos de avisos conocidos (PyPA Advisory Database / OSV).
+- Para las versiones especificadas en requirements.txt, la herramienta reporto: "No known vulnerabilities found" (cero vulnerabilidades conocidas).
+- Limitaciones del alcance:
+  1. El analisis cubre exclusivamente las dependencias fijadas en requirements.txt frente a reportes publicos conocidos a la fecha.
+  2. No sustituye auditorias de codigo fuente propio ni revisiones estaticas de seguridad en profundidad (SAST/DAST).
+  3. No se modificaron dependencias del proyecto para evitar desestabilizar la compatibilidad del entorno.
+================================================================================
