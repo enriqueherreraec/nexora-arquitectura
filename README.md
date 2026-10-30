@@ -79,7 +79,7 @@ Este repositorio consolida la arquitectura del sistema, el contrato formal de in
 | **Linter y Estilo** | Flake8 7.4 (`.flake8`) |
 | **Pruebas Automatizadas** | Pytest 9.1, TestClient, Pytest-cov (92 % cobertura de código) |
 | **Asistencia Cognitiva** | Antigravity AI Assistant (Google DeepMind) |
-| **Control de Versiones** | Git 2.54 y GitHub (sin reescritura de historial) |
+| **Control de Versiones** | Git y GitHub con protección de main, revisión obligatoria por pares y etiquetas de versión |
 
 ---
 
