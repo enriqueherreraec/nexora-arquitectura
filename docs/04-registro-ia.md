@@ -6,6 +6,7 @@
 
 - **Semana 1:** ChatGPT (OpenAI) apoyó la organización, redacción inicial y revisión de documentos arquitectónicos; Antigravity se utilizó como entorno de desarrollo con asistencia de IA.
 - **Semana 2: uso y verificación de IA:** Antigravity AI Assistant (Google DeepMind) integrado en el IDE como herramienta I-CASE para la generación de especificaciones OpenAPI, diseño de algoritmos vocacionales, implementación de endpoints FastAPI, pruebas unitarias y transaccionales en PostgreSQL, redacción de informes técnicos y revisión crítica de los artefactos del proyecto.
+- **Semana 3: gobernanza y control de versiones:** Antigravity AI Assistant (Google DeepMind) integrado en el IDE como asistente para la estructuración de gobernanza (`CONTRIBUTING.md`, plantillas GitHub), matriz Git vs SVN, registro de decisión ADR-004, actualización de README, resolución local del conflicto de integración entre PR #8 y PR #10, y auditoría de seguridad y dependencias.
 
 ---
 
@@ -35,6 +36,19 @@
 
 ---
 
+## Semana 3: uso y verificación de IA en gobernanza y control de versiones
+
+| Actividad | Herramienta | Versión o modelo comprobado | Prompt resumido | Salida | Defectos o limitaciones | Decisión | Verificación y evidencia |
+|---|---|---|---|---|---|:---:|---|
+| **Gobernanza y Plantillas (PR #2 / Issue #1)** | Antigravity AI Assistant (Google DeepMind) | Modelo integrado en Antigravity IDE | "Elaborar CONTRIBUTING.md, plantilla de tareas y plantilla de pull request según rúbrica de Semana 3 y stack de Nexora." | [`CONTRIBUTING.md`](../CONTRIBUTING.md) y plantillas en [`.github/`](../.github/). | La propuesta inicial incluía flujos con ramas de release pesadas (GitFlow) no óptimas para un equipo de 3 integrantes. | **Modificar y aceptar** | Se adoptó GitHub Flow con ramas cortas por tarea y commits convencionales. Verificado en PR #2. |
+| **Matriz Comparativa Git vs SVN (PR #4 / Issue #3)** | Antigravity AI Assistant (Google DeepMind) | Modelo integrado en Antigravity IDE | "Estructurar matriz comparativa Git vs SVN en 7 dimensiones técnicas conforme a rúbrica UPEC y referencias APA." | [`docs/08-matriz-git-vs-svn.md`](08-matriz-git-vs-svn.md). | Se propuso una redacción donde svn lock impedía cualquier edición local, cuando en realidad coordina la confirmación sin bloquear copias locales. | **Modificar y aceptar** | Se precisó el funcionamiento de bloqueo en SVN y se validaron las 7 dimensiones con Pro Git y Version Control with Subversion. Verificado en PR #4. |
+| **Decisión Arquitectónica ADR-004 (PR #6 / Issue #5)** | Antigravity AI Assistant (Google DeepMind) | Modelo integrado en Antigravity IDE | "Redactar ADR-004 para seleccionar Git, GitHub y GitHub Flow con justificación, consecuencias y caso de uso de SVN." | [`docs/03-adr/ADR-004-control-de-versiones.md`](03-adr/ADR-004-control-de-versiones.md). | Se atribuyó la aprobación obligatoria de PRs a GitHub Flow de forma nativa, en lugar de reconocerla como una regla adoptada por el equipo de Nexora. | **Modificar y aceptar** | Corrección conceptual y delimitación de responsabilidades entre Git, GitHub y el flujo. Estado actualizado a Aceptado tras merge de PR #6. |
+| **Actualización README y Flujo (PR #8 / Issue #7)** | Antigravity AI Assistant (Google DeepMind) | Modelo integrado en Antigravity IDE | "Actualizar README.md con metadatos de Semana 3, tabla de artefactos y sección normativa de flujo de colaboración." | Sección `## 👥 Flujo de colaboración` y tabla tecnológica en [`README.md`](../README.md). | Uso recurrente de gerundios en la redacción inicial de los 6 pasos del flujo. | **Modificar y aceptar** | Reescritura completa en estilo directo sin gerundios ni conectores de relleno. Verificado en PR #8. |
+| **Resolución del Conflicto de Integración (PR #10 / Issue #9)** | Antigravity AI Assistant (Google DeepMind) | Modelo integrado en Antigravity IDE | "Asistir en la resolución local del conflicto de integración entre PR #8 y PR #10 tras intentos sin confirmar en el editor web." | Fila combinada unificada, [`docs/10-conflicto-integracion.md`](10-conflicto-integracion.md) y [`evidencias/semana3/conflicto/README-con-conflicto.md`](../evidencias/semana3/conflicto/README-con-conflicto.md). | El editor web de GitHub presentaba riesgo de sobrescribir la nueva sección de colaboración de Rosa. El modelo propuso inicialmente commit directo sin separar la evidencia del conflicto. | **Modificar y aceptar** | Se preservó la sección de Rosa, se unificó la fila de control de versiones, se respaldó la evidencia con marcadores y se verificó con `git diff --check`. Verificado en PR #10. |
+| **Auditoría de Seguridad y Cierre (Issue #11 / PR de cierre)** | Antigravity AI Assistant (Google DeepMind) | Modelo integrado en Antigravity IDE | "Ejecutar auditoría de secretos y dependencias, contrastar la rúbrica de Semana 3 y redactar docs/11-cierre-semana3.md." | [`docs/11-cierre-semana3.md`](11-cierre-semana3.md) e informes en [`evidencias/semana3/seguridad/`](../evidencias/semana3/seguridad/). | Inicialmente pip-audit no estaba instalado en el entorno principal. | **Modificar y aceptar** | Se instaló pip-audit en un entorno temporal aislado para auditar requirements.txt (código de salida 0, sin vulnerabilidades conocidas), se ejecutó pip check y se escaneó el repositorio por patrones de secretos. |
+
+---
+
 ## Contrastes y correcciones transversales
 
 | Propuesta inicial revisada | Tratamiento y corrección aplicada |
@@ -43,6 +57,8 @@
 | Simular correo sin activación explícita en pruebas | **Rechazado.** La simulación solo opera con activación explícita (`MODO_PRUEBAS_SIMULACION_CORREO=true`) en entorno `testing`. Fuera de testing o sin credenciales, se produce un error controlado (HTTP 503), nunca un éxito simulado falso. |
 | Presentar respuestas estáticas como prueba del mock | **Rechazado.** Se ejecutó el servidor Prism CLI real en el puerto 4010, enviando solicitudes HTTP vivas y capturando sus respuestas en `mock-requests.json`. |
 | Declarar cumplimiento de E3 mediante pruebas unitarias | **Rechazado.** Se distinguió formalmente la prueba funcional de aislamiento de la prueba de carga sostenida del dossier base (100 usuarios virtuales durante 10 minutos, P95 ≤ 2s, errores < 1 %). |
+| Intentar resolver el conflicto únicamente en el editor web de GitHub | **Rechazado.** La resolución web conllevaba riesgo de truncamiento de secciones extensas contiguas; se trasladó al entorno local para verificar el diff tripartito real y ejecutar `git diff --check`. |
+| Tratar los requisitos de gobernanza como automáticos de GitHub Flow | **Rechazado.** Se aclaró en ADR-004 y CONTRIBUTING.md que la protección de main, las revisiones obligatorias y los commits convencionales son reglas adoptadas explícitamente por el equipo. |
 
 ---
 

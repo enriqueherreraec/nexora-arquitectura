@@ -1,0 +1,60 @@
+================================================================================
+AUDITORIA DE DEPENDENCIAS - NEXORA (SEMANA 3)
+Fecha de ejecucion: 2026-10-30
+Ambiente: Windows PowerShell - Python 3.11.2
+================================================================================
+
+[1] COMPROBACION DE CONSISTENCIA Y CONFLICTOS (python -m pip check)
+Salida: No broken requirements found.
+
+[2] INVENTARIO DE DEPENDENCIAS DECLARADAS (requirements.txt)
+  * fastapi>=0.115.0
+  * uvicorn[standard]>=0.30.0
+  * pydantic>=2.8.0
+  * email-validator>=2.0.0
+  * sqlalchemy>=2.0.0
+  * psycopg2-binary>=2.9.9
+  * reportlab>=4.2.0
+  * pyjwt>=2.8.0
+  * argon2-cffi>=23.1.0
+  * python-multipart>=0.0.9
+  * pytest>=8.0.0
+  * pytest-cov>=5.0.0
+  * httpx>=0.27.0
+  * flake8>=7.0.0
+
+[3] REVISION DE VERSIONES DISPONIBLES (python -m pip list --outdated)
+  Package       Version   Latest     Type
+  ------------- --------- ---------- -----
+  certifi       2026.7.22 2026.10.23 wheel
+  coverage      7.16.0    7.17.0     wheel
+  dnspython     2.9.0     2.9.1      wheel
+  fastapi       0.141.1   0.162.0    wheel
+  flake8        7.4.1     7.5.0      wheel
+  idna          3.19      3.20       wheel
+  iniconfig     2.3.0     2.3.1      wheel
+  pip           26.2.1    26.2.2     wheel
+  pluggy        1.6.0     1.7.0      wheel
+  pydantic      2.13.5    2.14.2     wheel
+  pydantic_core 2.46.5    2.50.2     wheel
+  pyflakes      4.0.3     4.1.0      wheel
+  pytest        9.1.1     9.2.0      wheel
+  starlette     1.6.0     1.10.0     wheel
+  uvicorn       0.52.4    0.54.0     wheel
+
+[4] ALCANCE, LIMITACIONES Y DISTINCION DE ANALISIS DE DEPENDENCIAS
+- Distincion tecnica fundamental:
+  * El comando 'python -m pip check' comprueba compatibilidad del arbol de paquetes y detecta dependencias rotas, pero NO comprueba vulnerabilidades de seguridad.
+  * El comando 'python -m pip list --outdated' muestra la diferencia de versiones frente a las publicaciones mas recientes en PyPI, pero NO sustituye un analisis de vulnerabilidades.
+- Analisis de vulnerabilidades complementario:
+  * Se ejecuto 'pip-audit' dentro de un entorno temporal aislado sobre 'requirements.txt'.
+  * Resultado: Codigo de salida 0, sin vulnerabilidades conocidas registradas en PyPA/OSV para las versiones fijadas.
+  * Evidencia detallada disponible en 'evidencias/semana3/seguridad/auditoria-pip-audit.txt'.
+- Politica de conservacion:
+  * No se actualizaron dependencias ni se altero codigo funcional para mantener determinismo y estabilidad respecto a la suite historica.
+
+================================================================================
+CONCLUSION DE LA AUDITORIA DE DEPENDENCIAS:
+La pila tecnologica mantiene compatibilidad interna (pip check sin dependencias rotas).
+El analisis complementario con pip-audit no identifico vulnerabilidades conocidas en requirements.txt.
+================================================================================

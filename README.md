@@ -38,13 +38,15 @@ Este repositorio consolida la arquitectura del sistema, el contrato formal de in
 | [🏗️ ADR-003](docs/03-adr/ADR-003-estilo-arquitectonico.md) | Selección de monolito modular con capas frente a microservicios |
 | [🌿 ADR-004](docs/03-adr/ADR-004-control-de-versiones.md) | **(Semana 3)** Selección de Git, GitHub y GitHub Flow para el control de versiones |
 | [⚖️ Matriz de decisión](docs/03-adr/matriz-de-decision.md) | Comparativa de estilos arquitectónicos de la Semana 1 |
-| [🤖 Registro de IA](docs/04-registro-ia.md) | Bitácora de intervenciones de IA en Semana 1 y Semana 2 con auditoría crítica |
+| [🤖 Registro de IA](docs/04-registro-ia.md) | Bitácora de intervenciones de IA en Semanas 1, 2 y 3 con auditoría crítica |
 | [🤝 Revisión cruzada](docs/05-revision-cruzada.md) | Registro de observaciones y validación entre equipos |
 | [🛠️ Mapa de toolchain](docs/06-mapa-toolchain.md) | **(Semana 2)** Cadena CASE, 10 tareas priorizadas (F×E×R) y pruebas de herramientas Top |
 | [📋 Historias y criterios](docs/07-historias-y-criterios.md) | **(Semana 2)** 4 historias HU, criterios Gherkin, revisión ISO 29148 y trazabilidad |
 | [⚖️ Evaluación herramientas](docs/08-evaluacion-herramientas.md) | **(Semana 2)** Matriz ponderada de herramientas CASE (Spectral, Prism, Antigravity AI) |
 | [📊 Matriz Git vs SVN](docs/08-matriz-git-vs-svn.md) | **(Semana 3)** Comparativa técnica en siete dimensiones y justificación de Git |
 | [📄 Informe final CASE](docs/09-informe-cadena-case.md) | **(Semana 2)** Informe académico consolidado con todas las evidencias y resultados |
+| [🔀 Conflicto de integración](docs/10-conflicto-integracion.md) | **(Semana 3)** Reporte del conflicto deliberado entre PR #8 y PR #10 y su resolución |
+| [🏁 Cierre de Semana 3](docs/11-cierre-semana3.md) | **(Semana 3)** Consolidación del repositorio gobernado, cumplimiento de rúbrica y trazabilidad |
 | [📖 Lecturas de apoyo](docs/lecturas-de-apoyo.md) | Síntesis de C4, ADR, ISO/IEC 14102, ISO/IEC/IEEE 29148 y Pro Git |
 | [📘 Guía de contribución](CONTRIBUTING.md) | **(Semana 3)** Directrices de colaboración, ramas cortas, commits convencionales y revisiones |
 | [📜 Contrato OpenAPI](api/openapi.yaml) | Especificación formal OpenAPI 3.0.3 con las 4 rutas y esquemas Pydantic |
