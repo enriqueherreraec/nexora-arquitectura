@@ -3,7 +3,7 @@
 Todos los cambios notables en el proyecto Nexora se documentan en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y este proyecto se adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
-## [Sin publicar]
+## [0.3.0] - 2026-10-30
 
 ### Añadido
 - **Gobernanza y Guía de Contribución (`CONTRIBUTING.md`, `.github/`):** Adopción de GitHub Flow, plantillas de tareas y pull requests, commits convencionales, ramas cortas por tarea y política de protección de rama principal con revisión obligatoria por pares (PR #2, Issue #1).
@@ -11,7 +11,7 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/
 - **Registro de Decisión Arquitectónica ADR-004 (`docs/03-adr/ADR-004-control-de-versiones.md`):** Formalización de la selección de Git, GitHub y GitHub Flow, delimitación de responsabilidades y análisis de caso de uso para SVN (PR #6, Issue #5).
 - **Informe de Resolución de Conflicto de Integración (`docs/10-conflicto-integracion.md`):** Documentación técnica del ejercicio controlado de colisión entre PR #8 y PR #10, marcadores tripartitos, trazabilidad de hashes y resolución unificada (Issue #9).
 - **Evidencia Histórica de Conflicto (`evidencias/semana3/conflicto/README-con-conflicto.md`):** Respaldo auditable del archivo con marcadores de conflicto antes de la resolución.
-- **Informe de Cierre de Semana 3 (`docs/11-cierre-semana3.md`):** Matriz de cumplimiento frente a la rúbrica UPEC, registro de revisiones cruzadas, auditorías y trazabilidad de pull requests (PR de cierre pendiente de creación, Issue #11).
+- **Informe de Cierre de Semana 3 (`docs/11-cierre-semana3.md`):** Matriz de cumplimiento frente a la rúbrica UPEC, registro de revisiones cruzadas, auditorías y trazabilidad de pull requests (PR #12, Issue #11).
 - **Auditoría de Seguridad y Dependencias (`evidencias/semana3/seguridad/`):** Informes de escaneo de secretos (`auditoria-secretos.txt`), compatibilidad de dependencias con `pip check` (`auditoria-dependencias.txt`) y análisis de vulnerabilidades con `pip-audit` (`auditoria-pip-audit.txt`).
 - **Evidencias de Reglas de Gobernanza (`evidencias/semana3/gobernanza/`):** Cuatro capturas reales de la configuración de ruleset en GitHub (Settings → Rules → Rulesets) que acreditan la protección de main, revisión obligatoria (1 aprobación), descarte de revisiones obsoletas, resolución de conversaciones y bloqueo de push forzado.
 
