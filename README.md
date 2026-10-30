@@ -261,7 +261,7 @@ El 92 % de cobertura de código corresponde a las pruebas con `pytest`, la evalu
 
 El historial completo de transiciones se encuentra en el archivo [CHANGELOG.md](CHANGELOG.md).
 
-La versión `v0.2.0` corresponde a la entrega académica anterior, mientras que las actividades de la Semana 3 se encuentran en preparación.
+La versión `v0.2.0` corresponde a la entrega académica previa. Los entregables de la Semana 3 están consolidados en la rama principal tras la integración del PR #12 y la publicación de la versión formal `v0.3.0` constituye el siguiente paso.
 
 ---
 
