@@ -1,12 +1,20 @@
 ![Banner de NEXORA](nexora.jpeg)
 # 🎓 Nexora
-### Dossier de arquitectura y Cadena CASE · Sistema web de orientación vocacional
+### Dossier de arquitectura, Cadena CASE y Pipeline CI/CD · Sistema web de orientación vocacional
+
+[![CI/CD Pipeline](https://github.com/enriqueherreraec/nexora-arquitectura/actions/workflows/ci.yml/badge.svg)](https://github.com/enriqueherreraec/nexora-arquitectura/actions/workflows/ci.yml)
+[![Version](https://img.shields.io/badge/version-v0.3.0-blue.svg)](https://github.com/enriqueherreraec/nexora-arquitectura/releases)
+[![Coverage](https://img.shields.io/badge/coverage-92%25-brightgreen.svg)](tests/)
+[![Flake8](https://img.shields.io/badge/linter-flake8--0%20violations-success.svg)](.flake8)
+[![Spectral](https://img.shields.io/badge/OpenAPI-Spectral--0%20errors-brightgreen.svg)](.spectral.yaml)
+[![UPEC](https://img.shields.io/badge/UPEC-Maestr%C3%ADa%20en%20Software-purple.svg)](https://www.upec.edu.ec/)
+[![Render](https://img.shields.io/badge/Render-Cloud%20Deployed-teal.svg)](https://nexora-frontend.onrender.com)
 
 **MAESTRÍA EN INGENIERÍA EN SOFTWARE**
 
 | Información académica | Detalle |
 |---|---|
-| **Tarea** | Automatización de Procesos de Software · Semana 3, colaboración y control de versiones |
+| **Tarea** | Automatización de Procesos de Software · Semana 4: Pipeline CI/CD, Despliegue en la Nube y Métricas DORA |
 | **Módulo** | Automatización de Procesos de Software |
 | **Docente** | Ing. José Luis Rodríguez Chinchilla, Mgs. |
 
@@ -38,15 +46,20 @@ Este repositorio consolida la arquitectura del sistema, el contrato formal de in
 | [🏗️ ADR-003](docs/03-adr/ADR-003-estilo-arquitectonico.md) | Selección de monolito modular con capas frente a microservicios |
 | [🌿 ADR-004](docs/03-adr/ADR-004-control-de-versiones.md) | **(Semana 3)** Selección de Git, GitHub y GitHub Flow para el control de versiones |
 | [⚖️ Matriz de decisión](docs/03-adr/matriz-de-decision.md) | Comparativa de estilos arquitectónicos de la Semana 1 |
-| [🤖 Registro de IA](docs/04-registro-ia.md) | Bitácora de intervenciones de IA en Semanas 1, 2 y 3 con auditoría crítica |
+| [🤖 Registro de IA](docs/04-registro-ia.md) | Bitácora de intervenciones de IA en Semanas 1, 2, 3 y 4 con auditoría crítica y modelo Gemini 3.8 Flash |
+| [🔗 Matriz de trazabilidad](docs/05-trazabilidad.md) | **(Semana 4)** Trazabilidad bidireccional entre drivers, historias Gherkin, API, código, pruebas, commits y CI/CD |
 | [🤝 Revisión cruzada](docs/05-revision-cruzada.md) | Registro de observaciones y validación entre equipos |
 | [🛠️ Mapa de toolchain](docs/06-mapa-toolchain.md) | **(Semana 2)** Cadena CASE, 10 tareas priorizadas (F×E×R) y pruebas de herramientas Top |
 | [📋 Historias y criterios](docs/07-historias-y-criterios.md) | **(Semana 2)** 4 historias HU, criterios Gherkin, revisión ISO 29148 y trazabilidad |
 | [⚖️ Evaluación herramientas](docs/08-evaluacion-herramientas.md) | **(Semana 2)** Matriz ponderada de herramientas CASE (Spectral, Prism, Antigravity AI) |
 | [📊 Matriz Git vs SVN](docs/08-matriz-git-vs-svn.md) | **(Semana 3)** Comparativa técnica en siete dimensiones y justificación de Git |
+| [📄 Informe final Semana 4](docs/09-informe-final.md) | **(Semana 4)** Informe consolidado del proyecto, pipeline CI/CD, despliegue Render y métricas DORA |
 | [📄 Informe final CASE](docs/09-informe-cadena-case.md) | **(Semana 2)** Informe académico consolidado con todas las evidencias y resultados |
 | [🔀 Conflicto de integración](docs/10-conflicto-integracion.md) | **(Semana 3)** Reporte del conflicto deliberado entre PR #8 y PR #10 y su resolución |
 | [🏁 Cierre de Semana 3](docs/11-cierre-semana3.md) | **(Semana 3)** Consolidación del repositorio gobernado, cumplimiento de rúbrica y trazabilidad |
+| [🚨 Falla controlada en CI/CD](evidencias/semana4/falla-controlada.md) | **(Semana 4)** Registro auditable de violación de calidad inducida, bloqueo de pipeline y corrección |
+| [📊 Métricas DORA](evidencias/semana4/metricas-dora.md) | **(Semana 4)** Procedimiento matemático y cálculo sobre los 14 PRs (DF, LTTC, CFR, FDRT) |
+| [⚙️ Pipeline CI/CD](.github/workflows/ci.yml) | **(Semana 4)** Definición unificada de CI/CD: Flake8, Bandit, Spectral, Pytest, Redocly y Render CD |
 | [📖 Lecturas de apoyo](docs/lecturas-de-apoyo.md) | Síntesis de C4, ADR, ISO/IEC 14102, ISO/IEC/IEEE 29148 y Pro Git |
 | [📘 Guía de contribución](CONTRIBUTING.md) | **(Semana 3)** Directrices de colaboración, ramas cortas, commits convencionales y revisiones |
 | [📜 Contrato OpenAPI](api/openapi.yaml) | Especificación formal OpenAPI 3.0.3 con las 4 rutas y esquemas Pydantic |

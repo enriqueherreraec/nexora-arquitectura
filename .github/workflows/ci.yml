@@ -1,4 +1,4 @@
-name: CI/CD Nexora - Integración y Despliegue Continuo
+name: CI/CD Nexora - Pipeline de Integración y Despliegue Continuo
 
 on:
   push:
@@ -9,8 +9,44 @@ on:
       - main
 
 jobs:
-  ci-backend:
-    name: CI Backend (Pruebas, Linter, Contrato OpenAPI y Sintaxis)
+  ci-lint-and-static-analysis:
+    name: Lint, Análisis Estático y Spectral
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar código fuente
+        uses: actions/checkout@v4
+
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Configurar Node.js 20 (Herramientas CASE y Spectral)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Instalar dependencias de linting y seguridad
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 bandit
+
+      - name: 1. Verificación de estilo con Flake8 (Cero violaciones)
+        run: |
+          flake8 src tests
+
+      - name: 2. Análisis estático de seguridad con Bandit
+        run: |
+          bandit -r src/ -ll -q
+
+      - name: 3. Validación estricta del contrato OpenAPI 3.0 con Spectral CLI
+        run: |
+          npx --yes @stoplight/spectral-cli lint api/openapi.yaml --ruleset .spectral.yaml
+
+  ci-tests:
+    name: Pruebas Automatizadas (Pytest & PostgreSQL)
     runs-on: ubuntu-latest
 
     services:
@@ -29,7 +65,7 @@ jobs:
           --health-retries 5
 
     steps:
-      - name: Descargar repositorio
+      - name: Descargar código fuente
         uses: actions/checkout@v4
 
       - name: Configurar Python 3.11
@@ -38,21 +74,14 @@ jobs:
           python-version: "3.11"
           cache: "pip"
 
-      - name: Instalar dependencias académicas y del backend
+      - name: Instalar dependencias completas del backend y pruebas
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r backend/requirements.txt
+          python -m pip check
 
-      - name: Verificar calidad de código con Flake8 (Cero violaciones)
-        run: |
-          flake8 src tests
-
-      - name: Validar contrato OpenAPI 3.0 con Spectral CLI (Toolchain CASE)
-        run: |
-          npx @stoplight/spectral-cli lint api/openapi.yaml --ruleset .spectral.yaml
-
-      - name: Ejecutar suite de pruebas académicas de Semana 2 (PostgreSQL aislado)
+      - name: Ejecutar suite de pruebas con Pytest (Base aislada PostgreSQL)
         env:
           ENVIRONMENT: testing
           DB_HOST: localhost
@@ -63,18 +92,14 @@ jobs:
           SECRET_KEY: nexora_test_synthetic_secret_key_testing_only_2026_xyz
           MODO_PRUEBAS_SIMULACION_CORREO: "true"
         run: |
-          pytest tests/ -v
+          pytest tests/ -v --cov=src --cov-report=term-missing
 
-      - name: Compilar y validar sintaxis de la suite completa del backend
-        run: |
-          python -m py_compile backend/app/main.py backend/app/core/config.py backend/app/core/database.py backend/app/api/v1/health.py backend/scripts/seed_db.py
-
-  ci-frontend:
-    name: CI Frontend (TypeScript & Vite Build)
+  ci-docs-and-frontend:
+    name: Compilación Frontend y Documentación Redocly
     runs-on: ubuntu-latest
 
     steps:
-      - name: Descargar repositorio
+      - name: Descargar código fuente
         uses: actions/checkout@v4
 
       - name: Configurar Node.js 20
@@ -84,17 +109,28 @@ jobs:
           cache: "npm"
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Instalar dependencias del frontend
-        working-directory: frontend
-        run: npm ci
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-      - name: Compilar frontend (tsc -b && vite build)
+      - name: 1. Construcción de documentación API con Redocly CLI
+        run: |
+          npx --yes @redocly/cli build-docs api/openapi.yaml -o docs/api/index.html
+
+      - name: 2. Compilación del Frontend (TypeScript & Vite)
         working-directory: frontend
-        run: npm run build
+        run: |
+          npm ci
+          npm run build
+
+      - name: 3. Verificación de sintaxis de módulos y scripts del Backend
+        run: |
+          python -m py_compile backend/app/main.py backend/app/core/config.py backend/app/core/database.py backend/app/api/v1/health.py backend/scripts/seed_db.py
 
   cd-deploy:
     name: CD Despliegue en Render y Prueba de Humo
-    needs: [ci-backend, ci-frontend]
+    needs: [ci-lint-and-static-analysis, ci-tests, ci-docs-and-frontend]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
 
@@ -106,19 +142,19 @@ jobs:
           if [ -n "${{ secrets.RENDER_BACKEND_DEPLOY_HOOK }}" ]; then
             echo "Notificando a Render para desplegar el servicio Backend..."
             curl -f -X POST "${{ secrets.RENDER_BACKEND_DEPLOY_HOOK }}"
-            echo "Webhook de Backend ejecutado."
+            echo "Webhook de Backend ejecutado exitosamente."
             DEPLOYED=true
           else
-            echo "RENDER_BACKEND_DEPLOY_HOOK no configurado en GitHub Secrets."
+            echo "RENDER_BACKEND_DEPLOY_HOOK no configurado en Secrets."
           fi
 
           if [ -n "${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK }}" ]; then
             echo "Notificando a Render para desplegar el Static Site Frontend..."
             curl -f -X POST "${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK }}"
-            echo "Webhook de Frontend ejecutado."
+            echo "Webhook de Frontend ejecutado exitosamente."
             DEPLOYED=true
           else
-            echo "RENDER_FRONTEND_DEPLOY_HOOK no configurado en GitHub Secrets."
+            echo "RENDER_FRONTEND_DEPLOY_HOOK no configurado en Secrets."
           fi
 
           echo "deployed=$DEPLOYED" >> $GITHUB_OUTPUT
