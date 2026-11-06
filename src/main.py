@@ -37,12 +37,16 @@ app.include_router(api_v1_router, prefix=settings.API_V1_PREFIX)
 
 
 @app.get("/health", tags=["Salud y Diagnóstico"])
+@app.get("/salud", tags=["Salud y Diagnóstico"])
 def health_check():
-    """Endpoint de comprobación de salud del servicio backend."""
+    """Endpoint de comprobación de salud del servicio backend con versión y commit."""
+    import os
+    commit_sha = os.getenv("RENDER_GIT_COMMIT") or os.getenv("GIT_COMMIT") or "e0f11e7"
     return {
         "status": "healthy",
         "service": "nexora-backend",
         "version": settings.PROJECT_VERSION,
+        "commit": commit_sha[:7],
         "database": "postgresql",
         "database_name": settings.DB_NAME,
     }
