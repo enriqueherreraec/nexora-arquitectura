@@ -10,10 +10,13 @@ backend_dir = Path(__file__).resolve().parent.parent
 sys.path.append(str(backend_dir))
 
 from app.core.database import engine, SessionLocal, Base
-from app.modules.catalogo.models import CarreraCatalogo
-from app.modules.catalogo.data import OFERTA_CARRERAS
 from app.modules.cuentas.models import Usuario
-from app.modules.cuentas.dependencies import get_password_hash
+from app.modules.perfiles.models import Perfil  # noqa: F401
+from app.modules.evaluaciones.models import Evaluacion  # noqa: F401
+from app.modules.catalogo.models import CarreraCatalogo
+from app.modules.favoritos.models import Favorito  # noqa: F401
+from app.modules.catalogo.data import OFERTA_CARRERAS
+from app.core.security import hash_password
 
 
 def seed_database():
@@ -101,13 +104,15 @@ def seed_database():
             admin_user = Usuario(
                 email=admin_email,
                 nombre_completo="Administrador General Nexora",
-                password_hash=get_password_hash(admin_pass),
+                password_hash=hash_password(admin_pass),
                 rol="admin",
                 activo=True
             )
             db.add(admin_user)
             db.commit()
             print(f"[OK] Usuario administrador registrado: {admin_email}")
+        else:
+            print(f"[OK] Usuario administrador '{admin_email}' ya existe. No requiere siembra.")
 
         gestor_email = os.getenv("GESTOR_EMAIL", "gestor@nexora.ec")
         gestor_user = db.query(Usuario).filter(Usuario.email == gestor_email).first()
@@ -122,13 +127,15 @@ def seed_database():
             gestor_user = Usuario(
                 email=gestor_email,
                 nombre_completo="Gestor Académico Nexora",
-                password_hash=get_password_hash(gestor_pass),
+                password_hash=hash_password(gestor_pass),
                 rol="gestor",
                 activo=True
             )
             db.add(gestor_user)
             db.commit()
             print(f"[OK] Usuario gestor registrado: {gestor_email}")
+        else:
+            print(f"[OK] Usuario gestor '{gestor_email}' ya existe. No requiere siembra.")
 
     except Exception as e:
         db.rollback()
