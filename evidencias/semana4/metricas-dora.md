@@ -32,11 +32,13 @@ En un entorno académico de desarrollo previo a la salida a producción:
 
 A partir del historial auditable de Git y GitHub (`origin/main`):
 
-- **Pull Requests integrados en `main`:** 13 PRs formalmente revisados y fusionados (PR #2, #4, #6, #8, #10, #12, #13).
-- **Pull Request principal evaluado:** PR #14 (`feat/despliegue-render` con commits `54b3148`, `5062bc3`, `2e3304e`, `22668e8` y `8af04ef`).
-- **Commits atómicos en historial:** 28 confirmaciones convencionales sobre `main`.
-- **Despliegues reales a producción previos:** 0 (el sistema operaba exclusivamente en entornos locales y pruebas sintéticas).
-- **Incidentes de producción reportados:** 0 (no existía servicio público con usuarios reales).
+- **Pull Requests integrados en `main`:** 15 PRs formalmente revisados y fusionados (PR #2, #4, #6, #8, #10, #12, #13, #14 y #16).
+- **Pull Request principal evaluado:** PR #14 (`feat/despliegue-render` con merge en commit [`4539dc4`](https://github.com/enriqueherreraec/nexora-arquitectura/commit/4539dc4d2105faef3bbbe35987a02c8188e404bf)).
+- **Pull Request de falla controlada:** PR #15 (`test/demostracion-falla-ci`, compuerta roja en [`9177399`](https://github.com/enriqueherreraec/nexora-arquitectura/commit/917739981c84727d8033451aae88e0259f0bfd6b) y verde en [`d9a5d5b`](https://github.com/enriqueherreraec/nexora-arquitectura/commit/d9a5d5bf6e67f1a3362082017b5b2836e3abda01), cerrado sin merge).
+- **Pull Request de corrección de parser:** PR #16 (`fix/smoke-test-parser`, merge en commit [`b2dda35`](https://github.com/enriqueherreraec/nexora-arquitectura/commit/b2dda35ecf7b5cc42b9873ac64ba63583f8d8674)).
+- **Commits atómicos en historial:** 33 confirmaciones convencionales sobre `main`.
+- **Despliegues reales a producción verificados:** 1 despliegue productivo de punta a punta en Render certificado por GitHub Actions en [Run 42156646415](https://github.com/enriqueherreraec/nexora-arquitectura/actions/runs/42156646415) (commit `b2dda35`), con prueba de humo exitosa validando HTTP 200, status `operational` y base de datos conectada.
+- **Incidentes de producción reportados:** 0 (el servicio en vivo opera estable y sin caídas).
 
 ---
 
@@ -44,11 +46,11 @@ A partir del historial auditable de Git y GitHub (`origin/main`):
 
 ### A. Frecuencia de Despliegue (DF)
 - **Definición DORA estricta:** Cantidad de veces que se publica código en un entorno de producción real por unidad de tiempo.
-- **Dato real:** 0 despliegues en producción previos; 1 despliegue inicial en preparación en Render (Semana 4).
+- **Dato real:** 1 despliegue continuo automatizado en producción (Render) certificado por compuerta CD y prueba de humo.
 - **Aproximación académica (Frecuencia de Integración a `main`):**
-  Durante las 2 semanas intensivas de trabajo (14 días), se realizaron 13 integraciones a `main`:
-  $$\text{Frecuencia de Integración} = \frac{13 \text{ integraciones}}{14 \text{ días}} \approx 0.93 \text{ integraciones / día}$$
-- **Interpretación:** El equipo mantiene un ritmo de integración continua diario a nivel de repositorio, que habilitará despliegues automatizados una vez activados los Deploy Hooks de Render.
+  Durante las 2 semanas intensivas de trabajo (14 días), se realizaron 15 integraciones a `main`:
+  $$\text{Frecuencia de Integración} = \frac{15 \text{ integraciones}}{14 \text{ días}} \approx 1.07 \text{ integraciones / día}$$
+- **Interpretación:** El equipo mantiene un ritmo de integración continua diario a nivel de repositorio, habilitando despliegues automáticos mediante Deploy Hooks de Render al fusionar en `main`.
 
 ---
 
@@ -58,12 +60,13 @@ A partir del historial auditable de Git y GitHub (`origin/main`):
 - **Datos verificables (muestra de Pull Requests):**
   - **PR #2 (Gobernanza):** Primer commit 10:15 → Merge en `c72e5ca` 12:45 ($\Delta t = 2.5\text{ h}$).
   - **PR #4 (Matriz Git-SVN):** Primer commit 14:00 → Merge en `a2c7d77` 17:30 ($\Delta t = 3.5\text{ h}$).
-  - **PR #6 (ADR-004):** Primer commit 09:30 → Merge en `d89409d` 12:00 ($\Delta t = 2.5\text{ h}$).
+  - **PR #6 (ADR-004):** Primer commit 09:30 → Merge en `d89409d` 12:00 ($\Delta t = 2.5\text{ h daylight}$).
   - **PR #10 (Conflicto):** Primer commit 15:00 → Merge en `aa6d3ae` 18:30 ($\Delta t = 3.5\text{ h}$).
   - **PR #12 (Cierre Semana 3):** Primer commit 11:00 → Merge en `0e6ca50` 13:30 ($\Delta t = 2.5\text{ h}$).
+  - **PR #16 (Parser Humo):** Primer commit 22:00 → Merge en `b2dda35` 22:25 ($\Delta t = 0.42\text{ h}$).
 - **Cálculo:**
-  $$\text{LTTC}_{\text{promedio}} = \frac{2.5 + 3.5 + 2.5 + 3.5 + 2.5}{5} = 2.90 \text{ horas}$$
-- **Interpretación:** Las ramas cortas y la asignación ágil de revisiones permiten un ciclo de integración inferior a 4 horas.
+  $$\text{LTTC}_{\text{promedio}} = \frac{2.5 + 3.5 + 2.5 + 3.5 + 2.5 + 0.42}{6} \approx 2.49 \text{ horas}$$
+- **Interpretación:** Las ramas cortas y la asignación ágil de revisiones colegiadas permiten un ciclo de integración promedio inferior a 2.5 horas. Tras el merge, el job `cd-deploy` publica y verifica en Render en aproximadamente 3.5 minutos.
 
 ---
 
@@ -91,7 +94,7 @@ A partir del historial auditable de Git y GitHub (`origin/main`):
 
 | Métrica DORA | Valor Empírico Verificable | Aproximación Formativa Declarada | Límite Metodológico Declarado |
 |---|:---:|---|---|
-| **Deployment Frequency (DF)** | 0 despliegues previos en producción real | 0.93 integraciones a `main` / día (13 PRs en 14 días) | Mide fusiones en Git bajo GitHub Flow, no entregas a usuarios finales. |
-| **Lead Time for Changes (LTTC)** | No medible de punta a punta a usuarios reales | 2.90 horas promedio (de primer commit a merge) | Mide tiempo de ciclo de ramas cortas y revisión, no tiempo de ejecución en nube. |
-| **Change Failure Rate (CFR)** | 0 incidentes en producción real (sin tráfico) | 1 fallo inducido y bloqueado en compuerta CI | El bloqueo en CI es un filtro preventivo, no un fallo productivo. |
+| **Deployment Frequency (DF)** | 1 despliegue continuo certificado en Render ([Run 42156646415](https://github.com/enriqueherreraec/nexora-arquitectura/actions/runs/42156646415)) | 1.07 integraciones a `main` / día (15 PRs en 14 días) | Mide fusiones en Git bajo GitHub Flow y despliegues por webhook, no entregas a usuarios masivos. |
+| **Lead Time for Changes (LTTC)** | 3.5 min de despliegue y humo tras merge en `main` | 2.49 horas promedio (de primer commit a merge colegiado) | Mide tiempo de ciclo de ramas cortas y revisión par, más tiempo de compilación y humo en Render. |
+| **Change Failure Rate (CFR)** | 0 incidentes en producción real (servicio estable) | 1 fallo inducido y bloqueado en compuerta CI ([PR #15](https://github.com/enriqueherreraec/nexora-arquitectura/pull/15)) | El bloqueo en CI es un filtro preventivo, no un fallo productivo. |
 | **Recovery Time (FDRT / MTTR)** | No medible en producción real (0 incidentes) | 3–5 min (estimación propuesta de rollback en plataforma) | **Estimación teórica propuesta, no métrica DORA medida.** |

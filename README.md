@@ -4,11 +4,11 @@
 
 [![CI/CD Pipeline](https://github.com/enriqueherreraec/nexora-arquitectura/actions/workflows/ci.yml/badge.svg)](https://github.com/enriqueherreraec/nexora-arquitectura/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/badge/version-v0.3.0-blue.svg)](https://github.com/enriqueherreraec/nexora-arquitectura/releases)
-[![Tests](https://img.shields.io/badge/tests-27%20passed%20(local)-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-27%20passed%20(CI%20%26%20local)-brightgreen.svg)](tests/)
 [![Flake8](https://img.shields.io/badge/linter-flake8--0%20violations-success.svg)](.flake8)
 [![Spectral](https://img.shields.io/badge/OpenAPI-Spectral--0%20errors-brightgreen.svg)](.spectral.yaml)
 [![UPEC](https://img.shields.io/badge/UPEC-Maestr%C3%ADa%20en%20Software-purple.svg)](https://www.upec.edu.ec/)
-[![Render](https://img.shields.io/badge/Render-Deployment%20Ready-blue.svg)](backend/)
+[![Render](https://img.shields.io/badge/Render-Live%20Operational-success.svg)](https://nexora-backend-ndp1.onrender.com/salud)
 
 **MAESTRÍA EN INGENIERÍA EN SOFTWARE**
 
@@ -274,7 +274,7 @@ El 92 % de cobertura de código corresponde a las pruebas con `pytest`, la evalu
 
 El historial completo de transiciones se encuentra en el archivo [CHANGELOG.md](CHANGELOG.md).
 
-La versión `v0.2.0` corresponde a la entrega académica previa. Los entregables de la Semana 3 están consolidados en la rama principal tras la integración del PR #12 y la publicación de la versión formal `v0.3.0` constituye el siguiente paso.
+La versión `v0.3.0` corresponde a la gobernanza y control de versiones. Los entregables de la Semana 4 (Pipeline CI/CD unificado, compuertas de calidad, falla controlada, métricas DORA y despliegue continuo en la nube Render con prueba de humo) quedan consolidados en la rama principal tras la integración de los PRs #14 y #16.
 
 ---
 
