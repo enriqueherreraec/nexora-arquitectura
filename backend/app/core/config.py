@@ -34,6 +34,7 @@ class Settings(BaseSettings):
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "https://nexora-frontend.onrender.com",
+        "https://nexora-frontend-zmvg.onrender.com",
     ]
 
     # Configuración de Servidor de Correo SMTP (Envío real de Informes PDF)

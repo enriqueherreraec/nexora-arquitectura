@@ -165,11 +165,12 @@ jobs:
       - name: Prueba de Humo con Espera Activa y Verificación de Commit
         if: steps.trigger_deploy.outputs.deployed == 'true'
         env:
-          BACKEND_URL: ${{ secrets.RENDER_BACKEND_URL || 'https://nexora-backend.onrender.com' }}
+          BACKEND_URL: ${{ secrets.RENDER_BACKEND_URL || 'https://nexora-backend-ndp1.onrender.com' }}
           EXPECTED_COMMIT: ${{ github.sha }}
         run: |
           SHORT_EXPECTED="${EXPECTED_COMMIT:0:7}"
-          HEALTH_URL="${BACKEND_URL}/salud"
+          CLEAN_URL="${BACKEND_URL%/}"
+          HEALTH_URL="${CLEAN_URL}/salud"
           echo "Iniciando prueba de humo contra: ${HEALTH_URL}"
           echo "Commit esperado en producción: ${SHORT_EXPECTED}"
 
