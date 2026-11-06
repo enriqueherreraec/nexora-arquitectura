@@ -185,17 +185,26 @@ jobs:
             BODY=$(echo "$RESPONSE" | sed '$d')
 
             if [ "$HTTP_CODE" -eq 200 ]; then
-              STATUS=$(echo "$BODY" | grep -o '"status":"[^"]*"' | cut -d'"' -f4 || true)
-              DEPLOYED_COMMIT=$(echo "$BODY" | grep -o '"commit":"[^"]*"' | cut -d'"' -f4 || true)
+              # Extraer estrictamente las propiedades raíz .status y .commit mediante jq (o fallback en Python3)
+              if command -v jq >/dev/null 2>&1; then
+                ROOT_STATUS=$(echo "$BODY" | jq -r '.status // empty')
+                ROOT_COMMIT=$(echo "$BODY" | jq -r '.commit // empty')
+              else
+                ROOT_STATUS=$(python3 -c "import sys, json; print(json.load(sys.stdin).get('status', ''))" <<< "$BODY")
+                ROOT_COMMIT=$(python3 -c "import sys, json; print(json.load(sys.stdin).get('commit', ''))" <<< "$BODY")
+              fi
 
-              echo "Respuesta HTTP 200 | Status: ${STATUS} | Commit detectado: ${DEPLOYED_COMMIT}"
+              # Normalizar a los primeros 7 caracteres para comparación uniforme
+              SHORT_DETECTED="${ROOT_COMMIT:0:7}"
 
-              if [ "$DEPLOYED_COMMIT" == "$SHORT_EXPECTED" ]; then
-                echo "¡Despliegue verificado exitosamente! El commit activo coincide con ${SHORT_EXPECTED}."
+              echo "Respuesta HTTP 200 | Status raíz: '${ROOT_STATUS}' | Commit detectado: '${SHORT_DETECTED}'"
+
+              if [ "$ROOT_STATUS" == "operational" ] && [ "$SHORT_DETECTED" == "$SHORT_EXPECTED" ]; then
+                echo "¡Despliegue verificado exitosamente! HTTP 200, status 'operational' y commit ${SHORT_EXPECTED} activo en Render."
                 SUCCESS=true
                 break
               else
-                echo "El servicio aún ejecuta un commit previo (${DEPLOYED_COMMIT}). Esperando nueva versión..."
+                echo "Esperando actualización: Status='${ROOT_STATUS}', Commit='${SHORT_DETECTED}' (esperado: '${SHORT_EXPECTED}'). Reintentando..."
               fi
             else
               echo "Servicio aún no disponible o actualizándose (HTTP ${HTTP_CODE})..."
