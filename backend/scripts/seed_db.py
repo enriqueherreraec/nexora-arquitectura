@@ -94,9 +94,9 @@ def seed_database():
             admin_pass = os.getenv("ADMIN_INITIAL_PASSWORD")
             if not admin_pass:
                 admin_pass = secrets.token_urlsafe(18)
-                print(f"[SEGURIDAD] Contraseña aleatoria generada para '{admin_email}': {admin_pass}")
+                print(f"[SEGURIDAD] Usuario inicial '{admin_email}' generado con token seguro.")
             else:
-                print(f"[SEGURIDAD] Contraseña para '{admin_email}' configurada desde variable de entorno.")
+                print(f"[SEGURIDAD] Usuario inicial '{admin_email}' configurado desde variable de entorno.")
 
             admin_user = Usuario(
                 email=admin_email,
@@ -115,9 +115,9 @@ def seed_database():
             gestor_pass = os.getenv("GESTOR_INITIAL_PASSWORD")
             if not gestor_pass:
                 gestor_pass = secrets.token_urlsafe(18)
-                print(f"[SEGURIDAD] Contraseña aleatoria generada para '{gestor_email}': {gestor_pass}")
+                print(f"[SEGURIDAD] Usuario inicial '{gestor_email}' generado con token seguro.")
             else:
-                print(f"[SEGURIDAD] Contraseña para '{gestor_email}' configurada desde variable de entorno.")
+                print(f"[SEGURIDAD] Usuario inicial '{gestor_email}' configurado desde variable de entorno.")
 
             gestor_user = Usuario(
                 email=gestor_email,

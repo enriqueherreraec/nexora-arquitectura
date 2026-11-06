@@ -206,7 +206,8 @@ export interface EmailResponse {
   aclaracion?: string;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8002/api/v1';
+const rawBase = (import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8002/api/v1').replace(/\/+$/, '');
+const API_BASE_URL = rawBase.endsWith('/api/v1') ? rawBase : `${rawBase}/api/v1`;
 
 export function getStoredToken(): string | null {
   return localStorage.getItem('nexora_token');
