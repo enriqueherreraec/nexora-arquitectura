@@ -33,7 +33,7 @@ En un entorno académico de desarrollo previo a la salida a producción:
 A partir del historial auditable de Git y GitHub (`origin/main`):
 
 - **Pull Requests integrados en `main`:** 13 PRs formalmente revisados y fusionados (PR #2, #4, #6, #8, #10, #12, #13).
-- **Pull Request en preparación:** PR #14 (`feat/despliegue-render` con commits `54b3148`, `5062bc3` y `2e3304e`).
+- **Pull Request principal evaluado:** PR #14 (`feat/despliegue-render` con commits `54b3148`, `5062bc3`, `2e3304e`, `22668e8` y `8af04ef`).
 - **Commits atómicos en historial:** 28 confirmaciones convencionales sobre `main`.
 - **Despliegues reales a producción previos:** 0 (el sistema operaba exclusivamente en entornos locales y pruebas sintéticas).
 - **Incidentes de producción reportados:** 0 (no existía servicio público con usuarios reales).
@@ -63,32 +63,35 @@ A partir del historial auditable de Git y GitHub (`origin/main`):
   - **PR #12 (Cierre Semana 3):** Primer commit 11:00 → Merge en `0e6ca50` 13:30 ($\Delta t = 2.5\text{ h}$).
 - **Cálculo:**
   $$\text{LTTC}_{\text{promedio}} = \frac{2.5 + 3.5 + 2.5 + 3.5 + 2.5}{5} = 2.90 \text{ horas}$$
-- **Interpretación:** Las ramas cortas y la asignación ágil de revisiones permiten un ciclo de integración inferior a 4 horas. A esto se sumarán los ~4 minutos que toma la ejecución del pipeline y la prueba de humo en Render.
+- **Interpretación:** Las ramas cortas y la asignación ágil de revisiones permiten un ciclo de integración inferior a 4 horas.
 
 ---
 
 ### C. Tasa de Fallos en Cambios (CFR)
 - **Definición DORA estricta:** Porcentaje de despliegues en producción que requieren remediación de emergencia (hotfix, rollback, degradación de servicio).
-- **Dato real:** No medible en producción por ausencia de historial con usuarios reales.
+- **Dato real:** No medible en producción por ausencia de historial con usuarios reales (0 incidentes).
 - **Aproximación de compuerta (Tasa de Rechazo en Pipeline):**
-  De los 14 PRs preparados, se planificó 1 escenario de falla controlada inducida en CI para validar que las compuertas funcionen.
-- **Interpretación:** No debe confundirse el rechazo de un PR por linter o contrato con un incidente de producción. La compuerta de CI evita precisamente que el CFR en producción aumente.
+  De los 15 PRs gestionados, 1 PR temporal ([PR #15](https://github.com/enriqueherreraec/nexora-arquitectura/pull/15)) se destinó a la verificación controlada de rechazo y corrección en compuerta CI.
+- **Interpretación:** No debe confundirse el rechazo preventivo de un PR por linter o contrato con un incidente de producción. La compuerta de CI evita precisamente que el CFR en producción aumente.
 
 ---
 
 ### D. Tiempo de Recuperación de Fallos (FDRT / MTTR)
-- **Definición DORA estricta:** Tiempo que transcurre desde la manifestación de una falla en producción hasta la completa restauración del servicio.
-- **Dato real:** No medible empíricamente en producción.
-- **Estimación teórica de infraestructura:**
-  Render permite revertir a un despliegue previo (*Rollback to this deploy*) en un tiempo estimado de **3 a 5 minutos**. En caso de requerir reversión en Git (`git revert`), el tiempo estimado para ejecutar la confirmación, superar el pipeline y disparar el hook es de **10 a 15 minutos**.
+- **Definición DORA estricta:** Tiempo transcurrido desde la manifestación de un fallo en producción hasta la completa restauración del servicio para los usuarios finales.
+- **Dato empírico real:** No medible en producción (0 incidentes productivos en el historial académico al no existir tráfico de usuarios reales).
+- **Estimaciones teóricas propuestas (no son métricas DORA medidas):**
+  Los tiempos de recuperación se documentan con estricta transparencia metodológica como **estimaciones propuestas de arquitectura**, delimitando su carácter hipotético y excluyéndolos de cualquier pretensión de métrica DORA empíricamente medida:
+  1. *Rollback instantáneo de plataforma (Render):* **3 a 5 minutos** requeridos para pulsar *Rollback to this deploy* en el panel de Render hacia la versión previa estable.
+  2. *Hotfix gobernado bajo Git Flow:* **10 a 15 minutos** estimados para aplicar una corrección en rama corta, verificarla automáticamente en la compuerta de CI (3 a 4 min), obtener la aprobación colegiada de un par y desplegar automáticamente por Deploy Hook.
+- **Límites metodológicos:** No puede presentarse como MTTR medido sin haber experimentado y cronometrado incidentes reales bajo carga productiva con usuarios finales.
 
 ---
 
 ## 4. Tabla Resumen de Métricas Aproximadas y sus Límites
 
-| Métrica DORA | Valor Empírico Verificable | Aproximación Formativa | Límite Metodológico Declarado |
+| Métrica DORA | Valor Empírico Verificable | Aproximación Formativa Declarada | Límite Metodológico Declarado |
 |---|:---:|---|---|
-| **Deployment Frequency (DF)** | 0 despliegues previos en prod. | 0.93 integraciones a `main` / día | Mide fusiones en Git, no entregas a usuarios reales. |
-| **Lead Time for Changes (LTTC)** | No medible de punta a punta a prod. | 2.90 horas (de commit a merge) | Mide tiempo de ciclo de PR, no tiempo de ejecución en nube. |
-| **Change Failure Rate (CFR)** | 0 incidentes en prod. (sin tráfico) | 1 fallo inducido en compuerta CI | El bloqueo en CI es un filtro preventivo, no un fallo productivo. |
-| **Recovery Time (FDRT / MTTR)** | No registrable en prod. | 3–5 min (rollback estimado en Render) | Estimación teórica de plataforma, no tiempo de incidente real. |
+| **Deployment Frequency (DF)** | 0 despliegues previos en producción real | 0.93 integraciones a `main` / día (13 PRs en 14 días) | Mide fusiones en Git bajo GitHub Flow, no entregas a usuarios finales. |
+| **Lead Time for Changes (LTTC)** | No medible de punta a punta a usuarios reales | 2.90 horas promedio (de primer commit a merge) | Mide tiempo de ciclo de ramas cortas y revisión, no tiempo de ejecución en nube. |
+| **Change Failure Rate (CFR)** | 0 incidentes en producción real (sin tráfico) | 1 fallo inducido y bloqueado en compuerta CI | El bloqueo en CI es un filtro preventivo, no un fallo productivo. |
+| **Recovery Time (FDRT / MTTR)** | No medible en producción real (0 incidentes) | 3–5 min (estimación propuesta de rollback en plataforma) | **Estimación teórica propuesta, no métrica DORA medida.** |
