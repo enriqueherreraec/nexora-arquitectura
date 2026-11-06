@@ -1,0 +1,211 @@
+name: CI/CD Nexora - Pipeline de Integración y Despliegue Continuo
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  ci-lint-and-static-analysis:
+    name: Lint, Análisis Estático y Spectral
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar código fuente
+        uses: actions/checkout@v4
+
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Configurar Node.js 20 (Herramientas CASE y Spectral)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Instalar dependencias de linting y seguridad
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 bandit
+
+      - name: 1. Verificación de estilo con Flake8 (Cero violaciones)
+        run: |
+          flake8 src tests
+
+      - name: 2. Análisis estático de seguridad con Bandit
+        run: |
+          bandit -r src/ -ll -q
+
+      - name: 3. Validación estricta del contrato OpenAPI 3.0 con Spectral CLI
+        run: |
+          npx --yes @stoplight/spectral-cli lint api/openapi.yaml --ruleset .spectral.yaml
+
+  ci-tests:
+    name: Pruebas Automatizadas (Pytest & PostgreSQL)
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: nexora_test_semana2
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres_test_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Descargar código fuente
+        uses: actions/checkout@v4
+
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Instalar dependencias completas del backend y pruebas
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r backend/requirements.txt
+          python -m pip check
+
+      - name: Ejecutar suite de pruebas con Pytest (Base aislada PostgreSQL)
+        env:
+          ENVIRONMENT: testing
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USER: postgres
+          DB_PASSWORD: postgres_test_password
+          DB_NAME: nexora_test_semana2
+          SECRET_KEY: nexora_test_synthetic_secret_key_testing_only_2026_xyz
+          MODO_PRUEBAS_SIMULACION_CORREO: "true"
+        run: |
+          pytest tests/ -v --cov=src --cov-report=term-missing
+
+  ci-docs-and-frontend:
+    name: Compilación Frontend y Documentación Redocly
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar código fuente
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 1. Construcción de documentación API con Redocly CLI
+        run: |
+          npx --yes @redocly/cli build-docs api/openapi.yaml -o docs/api/index.html
+
+      - name: 2. Compilación del Frontend (TypeScript & Vite)
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: 3. Verificación de sintaxis de módulos y scripts del Backend
+        run: |
+          python -m py_compile backend/app/main.py backend/app/core/config.py backend/app/core/database.py backend/app/api/v1/health.py backend/scripts/seed_db.py
+
+  cd-deploy:
+    name: CD Despliegue en Render y Prueba de Humo
+    needs: [ci-lint-and-static-analysis, ci-tests, ci-docs-and-frontend]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Disparar Deploy Hooks en Render
+        id: trigger_deploy
+        run: |
+          DEPLOYED=false
+          if [ -n "${{ secrets.RENDER_BACKEND_DEPLOY_HOOK }}" ]; then
+            echo "Notificando a Render para desplegar el servicio Backend..."
+            curl -f -X POST "${{ secrets.RENDER_BACKEND_DEPLOY_HOOK }}"
+            echo "Webhook de Backend ejecutado exitosamente."
+            DEPLOYED=true
+          else
+            echo "RENDER_BACKEND_DEPLOY_HOOK no configurado en Secrets."
+          fi
+
+          if [ -n "${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK }}" ]; then
+            echo "Notificando a Render para desplegar el Static Site Frontend..."
+            curl -f -X POST "${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK }}"
+            echo "Webhook de Frontend ejecutado exitosamente."
+            DEPLOYED=true
+          else
+            echo "RENDER_FRONTEND_DEPLOY_HOOK no configurado en Secrets."
+          fi
+
+          echo "deployed=$DEPLOYED" >> $GITHUB_OUTPUT
+
+      - name: Prueba de Humo con Espera Activa y Verificación de Commit
+        if: steps.trigger_deploy.outputs.deployed == 'true'
+        env:
+          BACKEND_URL: ${{ secrets.RENDER_BACKEND_URL || 'https://nexora-backend-ndp1.onrender.com' }}
+          EXPECTED_COMMIT: ${{ github.sha }}
+        run: |
+          SHORT_EXPECTED="${EXPECTED_COMMIT:0:7}"
+          CLEAN_URL="${BACKEND_URL%/}"
+          HEALTH_URL="${CLEAN_URL}/salud"
+          echo "Iniciando prueba de humo contra: ${HEALTH_URL}"
+          echo "Commit esperado en producción: ${SHORT_EXPECTED}"
+
+          MAX_ATTEMPTS=24
+          SLEEP_SECONDS=10
+          SUCCESS=false
+
+          for i in $(seq 1 $MAX_ATTEMPTS); do
+            echo "Intento $i/$MAX_ATTEMPTS: consultando ${HEALTH_URL}..."
+            RESPONSE=$(curl -s -w "\n%{http_code}" "${HEALTH_URL}" || true)
+            HTTP_CODE=$(echo "$RESPONSE" | tail -n 1)
+            BODY=$(echo "$RESPONSE" | sed '$d')
+
+            if [ "$HTTP_CODE" -eq 200 ]; then
+              STATUS=$(echo "$BODY" | grep -o '"status":"[^"]*"' | cut -d'"' -f4 || true)
+              DEPLOYED_COMMIT=$(echo "$BODY" | grep -o '"commit":"[^"]*"' | cut -d'"' -f4 || true)
+
+              echo "Respuesta HTTP 200 | Status: ${STATUS} | Commit detectado: ${DEPLOYED_COMMIT}"
+
+              if [ "$DEPLOYED_COMMIT" == "$SHORT_EXPECTED" ]; then
+                echo "¡Despliegue verificado exitosamente! El commit activo coincide con ${SHORT_EXPECTED}."
+                SUCCESS=true
+                break
+              else
+                echo "El servicio aún ejecuta un commit previo (${DEPLOYED_COMMIT}). Esperando nueva versión..."
+              fi
+            else
+              echo "Servicio aún no disponible o actualizándose (HTTP ${HTTP_CODE})..."
+            fi
+
+            sleep $SLEEP_SECONDS
+          done
+
+          if [ "$SUCCESS" != "true" ]; then
+            echo "Error: La prueba de humo no confirmó el despliegue del commit ${SHORT_EXPECTED} tras $((MAX_ATTEMPTS * SLEEP_SECONDS)) segundos."
+            exit 1
+          fi
+

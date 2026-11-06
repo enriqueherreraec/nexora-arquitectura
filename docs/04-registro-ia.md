@@ -7,6 +7,7 @@
 - **Semana 1:** ChatGPT (OpenAI) apoyó la organización, redacción inicial y revisión de documentos arquitectónicos; Antigravity se utilizó como entorno de desarrollo con asistencia de IA.
 - **Semana 2: uso y verificación de IA:** Antigravity AI Assistant (Google DeepMind) integrado en el IDE como herramienta I-CASE para la generación de especificaciones OpenAPI, diseño de algoritmos vocacionales, implementación de endpoints FastAPI, pruebas unitarias y transaccionales en PostgreSQL, redacción de informes técnicos y revisión crítica de los artefactos del proyecto.
 - **Semana 3: gobernanza y control de versiones:** Antigravity AI Assistant (Google DeepMind) integrado en el IDE como asistente para la estructuración de gobernanza (`CONTRIBUTING.md`, plantillas GitHub), matriz Git vs SVN, registro de decisión ADR-004, actualización de README, resolución local del conflicto de integración entre PR #8 y PR #10, y auditoría de seguridad y dependencias.
+- **Semana 4: automatización de CI/CD, métricas DORA y despliegue continuo:** Antigravity AI Assistant (Google DeepMind) integrado en el IDE con modelo Gemini 3.8 Flash (High) para la estructuración y unificación del pipeline en GitHub Actions (`.github/workflows/ci.yml`), implementación de pruebas de humo con sondeo de commit real, diseño de seguridad en el sembrado de base de datos, cálculo formal de métricas DORA y elaboración del informe final.
 
 ---
 
@@ -49,6 +50,18 @@
 
 ---
 
+## Semana 4: automatización de CI/CD, métricas DORA y despliegue continuo
+
+| Actividad | Herramienta | Versión o modelo comprobado | Prompt resumido | Salida | Defectos o limitaciones | Decisión | Verificación y evidencia |
+|---|---|---|---|---|---|:---:|---|
+| **Unificación de Pipeline CI/CD (`.github/workflows/ci.yml`)** | Antigravity AI Assistant (Google DeepMind) | Gemini 3.8 Flash (High) | "Diseñar workflow completo en .github/workflows/ci.yml que integre linting, análisis estático, Spectral, pruebas Pytest con PostgreSQL, compilación de frontend y despliegue CD en Render sin duplicidades." | Pipeline unificado [`.github/workflows/ci.yml`](../.github/workflows/ci.yml). | La propuesta inicial duplicaba archivos de configuración (`ci.yml` y `ci-cd.yml`) generando ejecuciones redundantes de las pruebas y linter. | **Modificar y aceptar** | Se consolidó un único pipeline con 3 jobs de CI (`ci-lint-and-static-analysis`, `ci-tests`, `ci-docs-and-frontend`) y 1 job de CD (`cd-deploy`) condicionado a `main`. |
+| **Seguridad y Parámetros en Despliegue Render** | Antigravity AI Assistant (Google DeepMind) | Gemini 3.8 Flash (High) | "Revisar variables de entorno y script de siembra para Render sin credenciales públicas o predecibles, con CORS configurado para el dominio real del frontend." | Script [`backend/scripts/seed_db.py`](../backend/scripts/seed_db.py) y ajustes en [`backend/app/core/config.py`](../backend/app/core/config.py). | La propuesta inicial sugería una SECRET_KEY hardcodeada de ejemplo y contraseñas fijas predecibles (`NexoraAdmin2026!`) en la siembra de usuarios. | **Modificar y aceptar** | Se refactorizó `seed_db.py` para utilizar `secrets.token_urlsafe(18)`, se instruyó la generación local de `SECRET_KEY` criptográfica y se restringió CORS a `https://nexora-frontend.onrender.com`. |
+| **Prueba de Humo Activa con Validación de Commit** | Antigravity AI Assistant (Google DeepMind) | Gemini 3.8 Flash (High) | "Diseñar paso de prueba de humo en el job CD que espere el despliegue en Render y confirme que el hash del commit coincida exactamente con ${{ github.sha }}." | Paso `Prueba de Humo con Espera Activa y Verificación de Commit` en [`.github/workflows/ci.yml`](../.github/workflows/ci.yml). | El paso inicial de CD solo ejecutaba `curl` al webhook sin esperar a que el servicio terminara de compilarse y reiniciarse en Render. | **Modificar y aceptar** | Se diseñó un bucle de sondeo activo (24 intentos x 10 s) que consulta `/salud` e inspecciona que el hash del commit coincida exactamente con los 7 primeros caracteres de `${{ github.sha }}`. |
+| **Falla Controlada en Pipeline CI/CD** | Antigravity AI Assistant (Google DeepMind) | Gemini 3.8 Flash (High) | "Diseñar y documentar un escenario de falla controlada en el pipeline CI/CD con bloqueo del flujo y evidencia de su resolución exitosa." | Evidencia en [`evidencias/semana4/falla-controlada.md`](../evidencias/semana4/falla-controlada.md). | Se proponía forzar una falla mediante sintaxis errónea en el archivo YAML de workflow en lugar de una violación de calidad en el código. | **Modificar y aceptar** | Se indujo una violación controlada de contrato y linter en una rama de prueba para evidenciar el bloqueo real del pipeline y su corrección auditable. |
+| **Cálculo Metodológico de Métricas DORA** | Antigravity AI Assistant (Google DeepMind) | Gemini 3.8 Flash (High) | "Formular el procedimiento matemático de cálculo de las 4 métricas DORA y calcularlas sobre los 14 PRs y commits reales de Nexora." | Sección de Métricas DORA en [`docs/09-informe-final.md`](09-informe-final.md) y [`evidencias/semana4/metricas-dora.md`](../evidencias/semana4/metricas-dora.md). | Se presentaban números de métricas DORA teóricos sin justificar el procedimiento matemático ni contrastarlos con el historial de Git. | **Modificar y aceptar** | Se estructuró el procedimiento formal con fórmulas matemáticas, ventana temporal y datos reales de los 14 PRs del proyecto. |
+
+---
+
 ## Contrastes y correcciones transversales
 
 | Propuesta inicial revisada | Tratamiento y corrección aplicada |
@@ -59,6 +72,8 @@
 | Declarar cumplimiento de E3 mediante pruebas unitarias | **Rechazado.** Se distinguió formalmente la prueba funcional de aislamiento de la prueba de carga sostenida del dossier base (100 usuarios virtuales durante 10 minutos, P95 ≤ 2s, errores < 1 %). |
 | Intentar resolver el conflicto únicamente en el editor web de GitHub | **Rechazado.** La resolución web conllevaba riesgo de truncamiento de secciones extensas contiguas; se trasladó al entorno local para verificar el diff tripartito real y ejecutar `git diff --check`. |
 | Tratar los requisitos de gobernanza como automáticos de GitHub Flow | **Rechazado.** Se aclaró en ADR-004 y CONTRIBUTING.md que la protección de main, las revisiones obligatorias y los commits convencionales son reglas adoptadas explícitamente por el equipo. |
+| Activar Auto-Deploy de Render directamente en push | **Rechazado.** Permitir que Render compile y despliegue ante cualquier push anula el valor de los controles del pipeline. Se configuró `Auto-Deploy: No` y se condicionó la publicación a los Deploy Hooks disparados tras la aprobación completa del CI en `main`. |
+| Emplear contraseñas fijas de prueba en el sembrado de producción | **Rechazado.** La inclusión de credenciales fijas en scripts versionados viola las directrices de seguridad de la maestría. Se implementó generación criptográfica con `secrets.token_urlsafe(18)` o inyección explícita por variables de entorno en Render. |
 
 ---
 
