@@ -1,81 +1,55 @@
-# 🚨 Evidencia de Falla Controlada en el Pipeline CI/CD y su Corrección
+# 🚨 Evidencia de Falla Controlada en el Pipeline CI/CD
 
 | Metadato | Detalle |
 |---|---|
 | **Proyecto** | Nexora · Sistema web de orientación vocacional |
 | **Módulo** | Automatización de Procesos de Software · Semana 4 |
-| **Objetivo** | Demostrar que el pipeline de GitHub Actions (`ci.yml`) actúa como una compuerta estricta de calidad, bloqueando la integración y el despliegue ante fallos inducidos, y permitiéndolos únicamente tras su corrección verificada |
+| **Criterio de Evaluación** | Rúbrica Semana 4 · Criterio 2: Pipeline CI con quality gates funcionando (Ponderación: 30 %) |
+| **Requisito Docente** | Evidencia de una falla provocada y corregida en el pipeline CI con checks obligatorios en `main` |
+| **Estado de Verificación** | 🟡 **Demostración técnica estructurada localmente; ejecución y enlaces en GitHub Actions pendientes de generarse al abrir el Pull Request correspondiente** |
 
 ---
 
-## 1. Escenario de Falla Inducida (Compuerta de Calidad en Rojo)
+## 1. Diseño del Experimento de Falla Provocada
 
-Para verificar que la compuerta de integración continua no sea meramente decorativa, se indujo un fallo deliberado en dos niveles de control:
+Para demostrar que el pipeline [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) actúa como una compuerta estricta (*Quality Gate*) y no permite el paso de código no conforme, se planificó y estructuró una falla inducida en dos etapas:
 
-1. **Violación de Estilo (Flake8):** Inyección de importaciones no utilizadas (`import sys, math`) y espaciado incorrecto (violación PEP 8 `E302: expected 2 blank lines`) en `src/api/v1/auth.py`.
-2. **Violación de Contrato (Spectral CLI):** Eliminación de la propiedad requerida `access_token` en el esquema de respuesta `AuthResponse` en `api/openapi.yaml`.
-
-### Registro del Fallo en GitHub Actions (Ejecución Bloqueada)
-
-```text
-Run flake8 src tests
-src/api/v1/auth.py:4:1: F401 'sys' imported but unused
-src/api/v1/auth.py:4:1: F401 'math' imported but unused
-src/api/v1/auth.py:12:1: E302 expected 2 blank lines, found 1
-Error: Process completed with exit code 1.
-
-Run npx --yes @stoplight/spectral-cli lint api/openapi.yaml --ruleset .spectral.yaml
-api/openapi.yaml:45:12  error  oas3-schema  "access_token" property must be present in object.
-✖ 1 problem (1 error, 0 warnings, 0 infos, 0 hints)
-Error: Process completed with exit code 1.
+```mermaid
+flowchart LR
+    A["1. Código con Violación<br>(Flake8 / Spectral)"] --> B["2. Ejecución CI<br>(Job falla con exit code 1)"]
+    B --> C["3. Compuerta Activa<br>(Bloqueo de Merge y CD)"]
+    C --> D["4. Corrección Atómica<br>(Limpieza y re-formato)"]
+    D --> E["5. Re-ejecución CI<br>(Job pasa a verde exit code 0)"]
 ```
 
-### Efecto en el Repositorio y Despliegue
-- El job `ci-lint-and-static-analysis` finalizó con **Failure (Exit Code 1)**.
-- Los jobs dependientes (`ci-tests`, `ci-docs-and-frontend` y `cd-deploy`) fueron **cancelados / omitidos (*skipped*)**.
-- El ruleset de GitHub bloqueó el botón de *Merge* del Pull Request al no cumplirse los checks obligatorios de estado.
-- **Render no recibió ninguna notificación ni desplegó código defectuoso**, demostrando la efectividad de la compuerta y de la directiva `Auto-Deploy: No`.
+### A. Fallo Inducido (Compuerta en Rojo)
+- **Defecto inyectado:**
+  1. **Linter (Flake8):** Inserción deliberada de importaciones huérfanas (`import sys, math`) y espaciado erróneo (`E302: expected 2 blank lines, found 1`) en `src/api/v1/auth.py`.
+  2. **Contrato OpenAPI (Spectral CLI):** Omisión del campo requerido `access_token` en el esquema `AuthResponse` de `api/openapi.yaml`.
+- **Comportamiento esperado en CI:**
+  - El job `ci-lint-and-static-analysis` termina con código de salida `1`.
+  - Los jobs dependientes (`ci-tests`, `ci-docs-and-frontend` y `cd-deploy`) se cancelan (*skipped*).
+  - El Pull Request queda bloqueado en GitHub impidiendo la fusión hacia `main`.
+  - Render no recibe solicitud de despliegue (`Auto-Deploy: No`).
+
+### B. Corrección Aplicada (Compuerta en Verde)
+- **Subsanación:**
+  1. Retiro de módulos no utilizados y normalización de saltos de línea según `.flake8`.
+  2. Restitución estricta de `access_token` como propiedad requerida en `api/openapi.yaml`.
+- **Comportamiento esperado en CI:**
+  - Todos los jobs (`ci-lint-and-static-analysis`, `ci-tests`, `ci-docs-and-frontend`) finalizan con código de salida `0`.
+  - Se habilitan los checks en verde en el Pull Request.
 
 ---
 
-## 2. Corrección Aplicada (Compuerta de Calidad en Verde)
+## 2. Registro de Trazabilidad y Enlaces Pendientes en GitHub Actions
 
-Se procedió a subsanar de forma atómica los defectos inducidos:
+| Paso de la Demostración | Rama de Trabajo | Commit / PR Vinculado | Estado Técnico | Enlace de Ejecución en GitHub Actions |
+|---|---|---|:---:|---|
+| **1. Inyección de Falla** | `test/demostracion-falla-ci` | Pendiente de commit en rama de prueba | 🟡 Preparado localmente | *(Se generará automáticamente al enviar el PR a GitHub)* |
+| **2. Bloqueo de Compuerta** | `test/demostracion-falla-ci` | Job `ci-lint-and-static-analysis` fallido | 🟡 Pendiente de log en GitHub | *(Enlace a la ejecución fallida en GitHub Actions)* |
+| **3. Corrección Atómica** | `test/demostracion-falla-ci` | Commit correctivo de linter y contrato | 🟡 Preparado localmente | *(Enlace al commit de corrección)* |
+| **4. Validación en Verde** | `test/demostracion-falla-ci` | Re-ejecución aprobada (exit code 0) | 🟡 Pendiente de log en GitHub | *(Enlace a la ejecución aprobada en GitHub Actions)* |
 
-1. **Corrección de Linter:** Eliminación de los módulos no utilizados `sys` y `math`, y normalización del espaciado según `.flake8`.
-2. **Corrección de Contrato:** Restauración de la propiedad `access_token: type string` en el esquema `AuthResponse` de `api/openapi.yaml`.
-
-### Registro de la Re-ejecución Exitosa en GitHub Actions
-
-```text
-Run flake8 src tests
-[OK] 0 violaciones detectadas. Código de salida: 0.
-
-Run bandit -r src/ -ll -q
-[OK] 0 problemas de seguridad encontrados. Código de salida: 0.
-
-Run npx --yes @stoplight/spectral-cli lint api/openapi.yaml --ruleset .spectral.yaml
-No results with a severity of 'error' found!
-[OK] Contrato OpenAPI 3.0 validado estrictamente. Código de salida: 0.
-
-Run pytest tests/ -v --cov=src --cov-report=term-missing
-========================= 27 passed in 4.82s =========================
-Required test coverage of 90% reached. Total coverage: 92.4%
-[OK] Todas las pruebas aprobadas. Código de salida: 0.
-
-Run npx --yes @redocly/cli build-docs api/openapi.yaml -o docs/api/index.html
-🎉 bundled successfully in: docs/api/index.html (284 KiB) [⏱ 204ms].
-[OK] Documentación generada con éxito.
-
-Run npm run build
-✓ built in 437ms.
-[OK] Frontend React 19 + TypeScript compilado con éxito.
-```
-
----
-
-## 3. Conclusión de la Falla Controlada
-
-La prueba evidenció que:
-1. Las compuertas de análisis estático, linter y Spectral impiden que errores de sintaxis, violaciones de estilo o divergencias de contrato lleguen a la rama principal.
-2. El desacoplamiento entre el push de Git y el despliegue en Render (mediante Deploy Hooks condicionados y `Auto-Deploy: No`) previene que versiones inestables se publiquen en producción antes de superar la totalidad de los controles.
+> [!NOTE]
+> Para no contaminar el historial de la rama principal ni registrar ejecuciones ficticias, la demostración real en la interfaz de GitHub Actions se completará al abrir el Pull Request de prueba en el repositorio remoto.

@@ -8,6 +8,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   ci-lint-and-static-analysis:
     name: Lint, Análisis Estático y Spectral
@@ -204,3 +207,4 @@ jobs:
             echo "Error: La prueba de humo no confirmó el despliegue del commit ${SHORT_EXPECTED} tras $((MAX_ATTEMPTS * SLEEP_SECONDS)) segundos."
             exit 1
           fi
+

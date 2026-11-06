@@ -4,11 +4,11 @@
 
 [![CI/CD Pipeline](https://github.com/enriqueherreraec/nexora-arquitectura/actions/workflows/ci.yml/badge.svg)](https://github.com/enriqueherreraec/nexora-arquitectura/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/badge/version-v0.3.0-blue.svg)](https://github.com/enriqueherreraec/nexora-arquitectura/releases)
-[![Coverage](https://img.shields.io/badge/coverage-92%25-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-27%20passed%20(local)-brightgreen.svg)](tests/)
 [![Flake8](https://img.shields.io/badge/linter-flake8--0%20violations-success.svg)](.flake8)
 [![Spectral](https://img.shields.io/badge/OpenAPI-Spectral--0%20errors-brightgreen.svg)](.spectral.yaml)
 [![UPEC](https://img.shields.io/badge/UPEC-Maestr%C3%ADa%20en%20Software-purple.svg)](https://www.upec.edu.ec/)
-[![Render](https://img.shields.io/badge/Render-Cloud%20Deployed-teal.svg)](https://nexora-frontend.onrender.com)
+[![Render](https://img.shields.io/badge/Render-Deployment%20Ready-blue.svg)](backend/)
 
 **MAESTRÍA EN INGENIERÍA EN SOFTWARE**
 
