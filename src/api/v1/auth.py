@@ -1,4 +1,3 @@
-import sys, math
 from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -9,6 +8,7 @@ from src.models.usuario import Usuario
 from src.schemas.auth import LoginRequest, TokenResponse, UsuarioResponse, PerfilResponse
 
 router = APIRouter(prefix="/auth", tags=["Autenticación"])
+
 
 @router.post(
     "/login",
