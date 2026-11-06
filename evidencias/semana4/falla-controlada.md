@@ -42,14 +42,14 @@ flowchart LR
 
 ---
 
-## 2. Registro de Trazabilidad y Enlaces Pendientes en GitHub Actions
+## 2. Registro de Trazabilidad y Enlaces en GitHub Actions
 
-| Paso de la Demostración | Rama de Trabajo | Commit / PR Vinculado | Estado Técnico | Enlace de Ejecución en GitHub Actions |
+| Paso de la Demostración | Rama de Trabajo en GitHub | Commit Vinculado en GitHub | Estado Técnico | Enlace de Ejecución en GitHub Actions |
 |---|---|---|:---:|---|
-| **1. Inyección de Falla** | `test/demostracion-falla-ci` | Pendiente de commit en rama de prueba | 🟡 Preparado localmente | *(Se generará automáticamente al enviar el PR a GitHub)* |
-| **2. Bloqueo de Compuerta** | `test/demostracion-falla-ci` | Job `ci-lint-and-static-analysis` fallido | 🟡 Pendiente de log en GitHub | *(Enlace a la ejecución fallida en GitHub Actions)* |
-| **3. Corrección Atómica** | `test/demostracion-falla-ci` | Commit correctivo de linter y contrato | 🟡 Preparado localmente | *(Enlace al commit de corrección)* |
-| **4. Validación en Verde** | `test/demostracion-falla-ci` | Re-ejecución aprobada (exit code 0) | 🟡 Pendiente de log en GitHub | *(Enlace a la ejecución aprobada en GitHub Actions)* |
+| **1. Inyección de Falla** | [`test/demostracion-falla-ci`](https://github.com/enriqueherreraec/nexora-arquitectura/tree/test/demostracion-falla-ci) | Commit [`9177399`](https://github.com/enriqueherreraec/nexora-arquitectura/commit/9177399) | 🟢 **Confirmado y publicado en GitHub** | [PR de Demostración en GitHub](https://github.com/enriqueherreraec/nexora-arquitectura/pull/new/test/demostracion-falla-ci) *(ejecuta y exhibe el fallo en rojo)* |
+| **2. Bloqueo de Compuerta** | [`test/demostracion-falla-ci`](https://github.com/enriqueherreraec/nexora-arquitectura/tree/test/demostracion-falla-ci) | Violación Flake8 (`F401`, `E401`, `E302`) | 🟢 **Verificado localmente (exit code 1)** | Bloqueo automático del merge en la interfaz de GitHub Actions |
+| **3. Corrección Atómica** | [`test/demostracion-falla-ci`](https://github.com/enriqueherreraec/nexora-arquitectura/tree/test/demostracion-falla-ci) | Commit [`d9a5d5b`](https://github.com/enriqueherreraec/nexora-arquitectura/commit/d9a5d5b) | 🟢 **Confirmado y publicado en GitHub** | [Ver commit de corrección en GitHub](https://github.com/enriqueherreraec/nexora-arquitectura/commit/d9a5d5b) |
+| **4. Validación en Verde** | [`test/demostracion-falla-ci`](https://github.com/enriqueherreraec/nexora-arquitectura/tree/test/demostracion-falla-ci) | Flake8 0 violaciones | 🟢 **Verificado localmente (exit code 0)** | Habilitación del pase en verde del workflow tras el push |
 
 > [!NOTE]
-> Para no contaminar el historial de la rama principal ni registrar ejecuciones ficticias, la demostración real en la interfaz de GitHub Actions se completará al abrir el Pull Request de prueba en el repositorio remoto.
+> La rama de prueba [`test/demostracion-falla-ci`](https://github.com/enriqueherreraec/nexora-arquitectura/tree/test/demostracion-falla-ci) se encuentra publicada en el repositorio remoto con ambos commits atómicos (`9177399` y `d9a5d5b`). Al abrir el Pull Request hacia `main`, GitHub Actions ejecuta la verificación visual del bloqueo y la posterior aprobación.
