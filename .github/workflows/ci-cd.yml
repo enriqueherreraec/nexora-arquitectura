@@ -10,7 +10,7 @@ on:
 
 jobs:
   ci-backend:
-    name: CI Backend (Pruebas, Linter y Sintaxis)
+    name: CI Backend (Pruebas, Linter, Contrato OpenAPI y Sintaxis)
     runs-on: ubuntu-latest
 
     services:
@@ -48,7 +48,11 @@ jobs:
         run: |
           flake8 src tests
 
-      - name: Ejecutar suite de pruebas de Semana 2 (PostgreSQL aislado)
+      - name: Validar contrato OpenAPI 3.0 con Spectral CLI (Toolchain CASE)
+        run: |
+          npx @stoplight/spectral-cli lint api/openapi.yaml --ruleset .spectral.yaml
+
+      - name: Ejecutar suite de pruebas académicas de Semana 2 (PostgreSQL aislado)
         env:
           ENVIRONMENT: testing
           DB_HOST: localhost
@@ -89,28 +93,78 @@ jobs:
         run: npm run build
 
   cd-deploy:
-    name: CD Despliegue en Render (Producción)
+    name: CD Despliegue en Render y Prueba de Humo
     needs: [ci-backend, ci-frontend]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
 
     steps:
-      - name: Disparar Deploy Hook de Backend en Render
+      - name: Disparar Deploy Hooks en Render
+        id: trigger_deploy
         run: |
+          DEPLOYED=false
           if [ -n "${{ secrets.RENDER_BACKEND_DEPLOY_HOOK }}" ]; then
             echo "Notificando a Render para desplegar el servicio Backend..."
             curl -f -X POST "${{ secrets.RENDER_BACKEND_DEPLOY_HOOK }}"
-            echo "Webhook de Backend ejecutado exitosamente."
+            echo "Webhook de Backend ejecutado."
+            DEPLOYED=true
           else
-            echo "Deploy Hook de Backend no configurado en Secrets. El servicio se actualizará mediante Auto-Deploy de Render conectado a la rama main."
+            echo "RENDER_BACKEND_DEPLOY_HOOK no configurado en GitHub Secrets."
           fi
 
-      - name: Disparar Deploy Hook de Frontend en Render
-        run: |
           if [ -n "${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK }}" ]; then
             echo "Notificando a Render para desplegar el Static Site Frontend..."
             curl -f -X POST "${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK }}"
-            echo "Webhook de Frontend ejecutado exitosamente."
+            echo "Webhook de Frontend ejecutado."
+            DEPLOYED=true
           else
-            echo "Deploy Hook de Frontend no configurado en Secrets. El sitio estático se actualizará mediante Auto-Deploy de Render conectado a la rama main."
+            echo "RENDER_FRONTEND_DEPLOY_HOOK no configurado en GitHub Secrets."
+          fi
+
+          echo "deployed=$DEPLOYED" >> $GITHUB_OUTPUT
+
+      - name: Prueba de Humo con Espera Activa y Verificación de Commit
+        if: steps.trigger_deploy.outputs.deployed == 'true'
+        env:
+          BACKEND_URL: ${{ secrets.RENDER_BACKEND_URL || 'https://nexora-backend.onrender.com' }}
+          EXPECTED_COMMIT: ${{ github.sha }}
+        run: |
+          SHORT_EXPECTED="${EXPECTED_COMMIT:0:7}"
+          HEALTH_URL="${BACKEND_URL}/salud"
+          echo "Iniciando prueba de humo contra: ${HEALTH_URL}"
+          echo "Commit esperado en producción: ${SHORT_EXPECTED}"
+
+          MAX_ATTEMPTS=24
+          SLEEP_SECONDS=10
+          SUCCESS=false
+
+          for i in $(seq 1 $MAX_ATTEMPTS); do
+            echo "Intento $i/$MAX_ATTEMPTS: consultando ${HEALTH_URL}..."
+            RESPONSE=$(curl -s -w "\n%{http_code}" "${HEALTH_URL}" || true)
+            HTTP_CODE=$(echo "$RESPONSE" | tail -n 1)
+            BODY=$(echo "$RESPONSE" | sed '$d')
+
+            if [ "$HTTP_CODE" -eq 200 ]; then
+              STATUS=$(echo "$BODY" | grep -o '"status":"[^"]*"' | cut -d'"' -f4 || true)
+              DEPLOYED_COMMIT=$(echo "$BODY" | grep -o '"commit":"[^"]*"' | cut -d'"' -f4 || true)
+
+              echo "Respuesta HTTP 200 | Status: ${STATUS} | Commit detectado: ${DEPLOYED_COMMIT}"
+
+              if [ "$DEPLOYED_COMMIT" == "$SHORT_EXPECTED" ]; then
+                echo "¡Despliegue verificado exitosamente! El commit activo coincide con ${SHORT_EXPECTED}."
+                SUCCESS=true
+                break
+              else
+                echo "El servicio aún ejecuta un commit previo (${DEPLOYED_COMMIT}). Esperando nueva versión..."
+              fi
+            else
+              echo "Servicio aún no disponible o actualizándose (HTTP ${HTTP_CODE})..."
+            fi
+
+            sleep $SLEEP_SECONDS
+          done
+
+          if [ "$SUCCESS" != "true" ]; then
+            echo "Error: La prueba de humo no confirmó el despliegue del commit ${SHORT_EXPECTED} tras $((MAX_ATTEMPTS * SLEEP_SECONDS)) segundos."
+            exit 1
           fi

@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     BACKEND_CORS_ORIGINS: List[str] = [
         "http://localhost:5173",
         "http://127.0.0.1:5173",
+        "https://nexora-frontend.onrender.com",
     ]
 
     # Configuración de Servidor de Correo SMTP (Envío real de Informes PDF)

@@ -85,26 +85,40 @@ def seed_database():
         else:
             print(f"[OK] Catálogo ya contiene {total_carreras} carreras. No requiere siembra.")
 
-        # 2. Verificar usuarios iniciales
+        # 2. Verificar usuarios iniciales (Seguridad estricta: sin claves predecibles)
+        import secrets
+
         admin_email = os.getenv("ADMIN_EMAIL", "admin@nexora.ec")
         admin_user = db.query(Usuario).filter(Usuario.email == admin_email).first()
         if not admin_user:
-            default_pass = os.getenv("ADMIN_INITIAL_PASSWORD", "NexoraAdmin2026!")
+            admin_pass = os.getenv("ADMIN_INITIAL_PASSWORD")
+            if not admin_pass:
+                admin_pass = secrets.token_urlsafe(18)
+                print(f"[SEGURIDAD] Contraseña aleatoria generada para '{admin_email}': {admin_pass}")
+            else:
+                print(f"[SEGURIDAD] Contraseña para '{admin_email}' configurada desde variable de entorno.")
+
             admin_user = Usuario(
                 email=admin_email,
                 nombre_completo="Administrador General Nexora",
-                password_hash=get_password_hash(default_pass),
+                password_hash=get_password_hash(admin_pass),
                 rol="admin",
                 activo=True
             )
             db.add(admin_user)
             db.commit()
-            print(f"[OK] Usuario administrador creado: {admin_email}")
+            print(f"[OK] Usuario administrador registrado: {admin_email}")
 
         gestor_email = os.getenv("GESTOR_EMAIL", "gestor@nexora.ec")
         gestor_user = db.query(Usuario).filter(Usuario.email == gestor_email).first()
         if not gestor_user:
-            gestor_pass = os.getenv("GESTOR_INITIAL_PASSWORD", "NexoraGestor2026!")
+            gestor_pass = os.getenv("GESTOR_INITIAL_PASSWORD")
+            if not gestor_pass:
+                gestor_pass = secrets.token_urlsafe(18)
+                print(f"[SEGURIDAD] Contraseña aleatoria generada para '{gestor_email}': {gestor_pass}")
+            else:
+                print(f"[SEGURIDAD] Contraseña para '{gestor_email}' configurada desde variable de entorno.")
+
             gestor_user = Usuario(
                 email=gestor_email,
                 nombre_completo="Gestor Académico Nexora",
@@ -114,7 +128,7 @@ def seed_database():
             )
             db.add(gestor_user)
             db.commit()
-            print(f"[OK] Usuario gestor creado: {gestor_email}")
+            print(f"[OK] Usuario gestor registrado: {gestor_email}")
 
     except Exception as e:
         db.rollback()
@@ -126,3 +140,4 @@ def seed_database():
 
 if __name__ == "__main__":
     seed_database()
+
